@@ -1,0 +1,8 @@
+[package]
+name = "heatmap_drawer"
+version = "0.1.0"
+authors = ["Alexey Golubev <dr.freecx@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+image_loader = { git = "https://gitlab.com/FreeCX/image_loader" }

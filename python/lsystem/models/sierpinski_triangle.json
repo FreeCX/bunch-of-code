@@ -1,0 +1,15 @@
+{
+    "axiom": "F-G-G",
+    "generate_rules": {
+        "F": "F-G+F+G-F",
+        "G": "GG"
+    },
+    "draw_rules": {
+        "F": "forward:20",
+        "G": "forward:20",
+        "+": "left:120",
+        "-": "right:120"
+    },
+    "iterations": 4,
+    "start_angle": 0
+}

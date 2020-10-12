@@ -1,0 +1,14 @@
+{
+    "axiom": "FX",
+    "generate_rules": {
+        "X": "X+YF+",
+        "Y": "-FX-Y"
+    },
+    "draw_rules": {
+        "F": "forward:10",
+        "+": "right:90",
+        "-": "left:90"
+    },
+    "iterations": 10,
+    "start_angle": 90
+}

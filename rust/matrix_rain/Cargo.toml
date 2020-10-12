@@ -1,0 +1,16 @@
+[package]
+name = "matrix_rain"
+version = "0.1.0"
+authors = ["Alexey Golubev <dr.freecx@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+rustty = "*"
+
+[profile.release]
+debug = false
+opt-level = 3
+rpath = false
+lto = true
+debug-assertions = false
+overflow-checks = false
