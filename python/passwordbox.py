@@ -25,7 +25,7 @@ def read(args):
 
     Входные параметры:
     args.box    -- входной файл
-    args.seed   -- зерно для фунции random.seed
+    args.seed   -- зерно для функции random.seed
     args.length -- длина пароля
     """
     alphabet = args.box.open().read()
@@ -38,7 +38,7 @@ def insert(args):
 
     Входные параметры:
     args.box        -- входной файл
-    args.seed       -- зерно для фунции random.seed
+    args.seed       -- зерно для функции random.seed
     args.password   -- пароль для записи
     args.reseed     -- автоматическая генерация нового seed
     args.max_seed   -- максимальное число для генерации seed
