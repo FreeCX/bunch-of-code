@@ -138,7 +138,7 @@ void render(Window *window) {
     point.load_vertex((GLfloat *)p.data(), (GLfloat *)colors.data(), 2, 3, p.size());
     point.render(GL_POINTS);
 
-    char buff[64];
+    char buff[96];
     sprintf(buff, "particles: %d; method: %s; fps: %.0f; phys: %.2f", particle_count, method[old_method], current_fps,
             current_user_time);
     font.render(buff, glm::vec3(10.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
