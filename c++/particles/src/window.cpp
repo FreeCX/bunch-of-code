@@ -74,11 +74,9 @@ void Window::loop(float fps) {
     if (keyboard_callback) {
         glfwSetKeyCallback(window, keyboard_callback);
     }
-    // create two threads:
-    //  - render
-    //  - user
-    // std::thread th_render(render_main_thread, this);
-    // std::thread th_user(this->user_main_thread, this);
+    if (mouse_callback) {
+        glfwSetMouseButtonCallback(window, mouse_callback);
+    }
 
     // Loop until the user closes the window
     while (!glfwWindowShouldClose(window)) {
@@ -96,9 +94,6 @@ void Window::loop(float fps) {
         glfwSwapBuffers(window);
     }
 
-    // th_render.join();
-    // th_user.join();
-
     glfwTerminate();
 }
 
@@ -112,6 +107,10 @@ void Window::init_gl(void (*init_func)(void)) {
 
 void Window::keyboard(void (*keyboard_func)(GLFWwindow *, int, int, int, int)) {
     keyboard_callback = keyboard_func;
+}
+
+void Window::mouse(void (*mouse_func)(GLFWwindow *, int, int, int)) {
+    mouse_callback = mouse_func;
 }
 
 void Window::user(void (*user_func)(const GLfloat)) {

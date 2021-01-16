@@ -107,11 +107,12 @@ void Points::step(const float dt, bool old = false) {
         }
 
         for (auto & block : grid) {
-            // TODO: fast fix
-            std::vector<int> items(block.second.begin(), block.second.end()); 
-            for (int i = 0; i < items.size(); i++) {
-                for (int j = i + 1; j < items.size(); j++) {
-                    collide(items[i], items[j]);
+            for (auto i = block.second.begin(); i != block.second.end(); i++) {
+                // TODO: rewrite this
+                for (auto j = i; j != block.second.end(); j++) {
+                    if (i != j) {
+                        collide(*i, *j);
+                    }
                 }
             }
         }
@@ -149,11 +150,11 @@ inline void Points::push(int index, glm::vec2 delta) {
     deltaPos[index] += delta;
 }
 
-std::vector<GLfloat> Points::convert() {
-    std::vector<GLfloat> res;
-    for (auto item : position) {
-        res.push_back(item.x);
-        res.push_back(item.y);
+void Points::explode(glm::vec2 pos, GLfloat k) {
+    for (int i = 0; i < position.size(); i++) {
+        glm::vec2 delta = position[i] - pos;
+        glm::vec2 n = glm::normalize(delta);
+        auto r = glm::length(delta);
+        push(i, k * n / r);
     }
-    return res;
 }

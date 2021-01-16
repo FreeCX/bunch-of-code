@@ -1,41 +1,46 @@
 #include "vertex.hpp"
 
-void Vertex::load_data(const std::vector<GLfloat> vertex, const GLint size, const GLsizei strides) {
-    load_data(vertex.data(), vertex.data() + vertex.size(), size, strides);
-}
+void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size, const GLint c_size, const GLint count) {
+    _count = count;
 
-void Vertex::load_data(const std::vector<GLfloat> vertex, const GLint size) {
-    load_data(vertex.data(), vertex.data() + vertex.size(), size, size);
-}
+    // буферы для данных
+    if (c == nullptr) {
+        glGenBuffers(1, vbo_handles);
+    } else {
+        glGenBuffers(2, vbo_handles);
+    }
 
-void Vertex::load_data(const GLfloat * start, const GLfloat * end, const GLint size, const GLsizei strides) {
-    _size_count = size;
-    _stride_count = strides;
-    _vert_size = end - start;
+    // vertex
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[0]);
+    glBufferData(GL_ARRAY_BUFFER, v_size * count * sizeof(GLfloat), v, GL_STATIC_DRAW);
 
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, _vert_size * sizeof(GLfloat), start, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, size, GL_FLOAT, GL_FALSE, strides * sizeof(GLfloat), (GLvoid *)0);
+    if (c != nullptr) {
+        // color
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[1]);
+        glBufferData(GL_ARRAY_BUFFER, c_size * count * sizeof(GLfloat), c, GL_STATIC_DRAW);
+    }
 
-    glEnableVertexAttribArray(0);
+    // objects data
+    glGenVertexArrays(1, &vao_handles);
+    glBindVertexArray(vao_handles);
 
-    glGenVertexArrays(1, &VAO);
-    glBindVertexArray(VAO);
+    glEnableVertexAttribArray(0); // vertex
+    if (c != nullptr) {
+        glEnableVertexAttribArray(1); // color
+    }
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, _vert_size * sizeof(GLfloat), start, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, size, GL_FLOAT, GL_FALSE, strides * sizeof(GLfloat), (GLvoid *)0);
-    glEnableVertexAttribArray(0);
-    glBindVertexArray(0);
-}
+    // 0
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[0]);
+    glVertexAttribPointer(0, v_size, GL_FLOAT, GL_FALSE, 0, NULL);
 
-void Vertex::load_data(const GLfloat * start, const GLfloat * end, const GLint size) {
-    load_data(start, end, size, size);
+    if (c != nullptr) {
+        // 1
+        glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[1]);
+        glVertexAttribPointer(1, c_size, GL_FLOAT, GL_FALSE, 0, NULL);   
+    }
 }
 
 void Vertex::render(const GLuint type) {
-    glBindVertexArray(VAO);
-    glDrawArrays(type, 0, _vert_size / _size_count);
-    glBindVertexArray(0);
+    glBindVertexArray(vao_handles);
+    glDrawArrays(type, 0, _count);
 }

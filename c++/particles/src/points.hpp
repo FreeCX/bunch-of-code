@@ -32,5 +32,6 @@ public:
     Points(const uint16_t, const float, const float, const float);
     ~Points();
     void step(const float, bool);
-    std::vector<GLfloat> convert();
+    void explode(glm::vec2 pos, GLfloat k);
+    std::vector<glm::vec2> points() { return position; }
 };

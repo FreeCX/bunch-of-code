@@ -5,24 +5,27 @@
 #include "font.hpp"
 #include "points.hpp"
 
-const uint16_t w_width = 600;
-const uint16_t w_height = 600;
-const GLfloat PIXEL_SIZE = 5.0f;
-const int SIZE = 10;
-const uint16_t MAX_FRAME_SKIP = 5;
-const uint16_t particle_count = 1000;
+const uint16_t w_width = 800;
+const uint16_t w_height = 800;
+const GLfloat PIXEL_SIZE = 3.0f;
+const GLfloat k = 1E-3f;
+const int SIZE = 8;
+const uint16_t MAX_FRAME_SKIP = 3;
+const uint16_t particle_count = 3000;
 const char * method[] = {"grid", "n^2"};
 
-ShaderProgram shader;
+ShaderProgram base_shader;
+ShaderProgram point_shader;
 Vertex data;
 Vertex point;
 
 Points points(particle_count, PIXEL_SIZE / (SIZE * 15), 0.9f, 0.9f);
+std::vector<glm::vec3> colors(particle_count);
 
 Font font(w_width, w_height);
 
 bool pause_flag = false;
-bool old_method = true;
+bool old_method = false;
 
 std::vector<GLfloat> generate_grid(GLuint vlines, GLuint hlines, float r) {
     const uint32_t ncoords = 4;
@@ -55,16 +58,28 @@ std::vector<GLfloat> generate_grid(GLuint vlines, GLuint hlines, float r) {
 void init(void) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
-    shader.create();
-    shader.addShader("assets/vertex.glsl", GL_VERTEX_SHADER);
-    shader.addShader("assets/fragment.glsl", GL_FRAGMENT_SHADER);
-    shader.link();
+    base_shader.create();
+    base_shader.addShader("assets/base_vertex.glsl", GL_VERTEX_SHADER);
+    base_shader.addShader("assets/base_fragment.glsl", GL_FRAGMENT_SHADER);
+    base_shader.link();
+
+    point_shader.create();
+    point_shader.addShader("assets/point_vertex.glsl", GL_VERTEX_SHADER);
+    point_shader.addShader("assets/point_fragment.glsl", GL_FRAGMENT_SHADER);
+    point_shader.link();
 
     auto grid = generate_grid(SIZE, SIZE, 1);
-    data.load_data(grid, 2);
+    data.load_vertex((GLfloat *)grid.data(), nullptr, 2, 0, grid.size() / 2);
 
-    font.shader("assets/vertex_text.glsl", "assets/fragment_text.glsl");
+    font.shader("assets/text_vertex.glsl", "assets/text_fragment.glsl");
     font.load("assets/FiraSans-Medium.ttf", 18);
+
+    for (int i = 0; i < particle_count; i++) {
+        float r = (rand() % 80 + 20) / 100.0f;
+        float g = (rand() % 80 + 20) / 100.0f;
+        float b = (rand() % 80 + 20) / 100.0f;
+        colors[i] = glm::vec3(r, g, b);
+    }
 }
 
 void deinit() {}
@@ -81,22 +96,23 @@ void render(Window * window) {
     } 
 
     glClear(GL_COLOR_BUFFER_BIT);
-
-    shader.run();
-    shader.uniform("ourColor", glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
-
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+    /* отрисовка сцены */
+    base_shader.run();
+    base_shader.uniform("in_color", glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
     data.render(GL_LINES);
 
-    shader.uniform("ourColor", glm::vec4(0.0f, 0.6f, 0.7f, 1.0f));
-
-    // don't do that
+    /* отрисовка точек */
+    point_shader.run();
+    // лучше так не делать
     glPointSize(PIXEL_SIZE);
 
-    point.load_data(points.convert(), 2);
+    // подготовка данных для рендера
+    auto p = points.points();
+    point.load_vertex((GLfloat *)p.data(), (GLfloat *)colors.data(), 2, 3, p.size());
     point.render(GL_POINTS);
 
     char buff[64];
@@ -131,6 +147,15 @@ void keyboard(GLFWwindow * window, int key, int scancode, int action, int mods) 
     }
 }
 
+void mouse(GLFWwindow * window, int button, int action, int mods) {
+    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+        double xpos, ypos;
+        glfwGetCursorPos(window, &xpos, &ypos);
+        glm::vec2 pos = {(2 * xpos - w_width) / w_width, -(2 * ypos - w_height) / w_height};
+        points.explode(pos, k);
+    }
+}
+
 int main() {
     Window window;
 
@@ -138,6 +163,7 @@ int main() {
     window.init_gl(init);
     window.render(render);
     window.keyboard(keyboard);
+    window.mouse(mouse);
     window.user(loop);
     window.loop(60.0f);
 
