@@ -7,10 +7,11 @@
 
 const uint16_t w_width = 600;
 const uint16_t w_height = 600;
-const GLfloat PIXEL_SIZE = 8.0f;
+const GLfloat PIXEL_SIZE = 5.0f;
 const int SIZE = 10;
 const uint16_t MAX_FRAME_SKIP = 5;
-const uint16_t particle_count = 500;
+const uint16_t particle_count = 1000;
+const char * method[] = {"grid", "n^2"};
 
 ShaderProgram shader;
 Vertex data;
@@ -21,6 +22,7 @@ Points points(particle_count, PIXEL_SIZE / (SIZE * 15), 0.9f, 0.9f);
 Font font(w_width, w_height);
 
 bool pause_flag = false;
+bool old_method = true;
 
 std::vector<GLfloat> generate_grid(GLuint vlines, GLuint hlines, float r) {
     const uint32_t ncoords = 4;
@@ -99,10 +101,12 @@ void render(Window * window) {
 
     char buff[64];
     sprintf(buff, "fps: %.0f", current_fps);
-    font.render(buff, glm::vec3(10.0f, 50.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    font.render(buff, glm::vec3(10.0f, 70.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
     sprintf(buff, "phys: %.2f ms", current_user_time);
-    font.render(buff, glm::vec3(10.0f, 30.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    font.render(buff, glm::vec3(10.0f, 50.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
     sprintf(buff, "particles: %d", particle_count);
+    font.render(buff, glm::vec3(10.0f, 30.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+    sprintf(buff, "method: %s", method[old_method]);
     font.render(buff, glm::vec3(10.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     glDisable(GL_BLEND);
@@ -111,7 +115,7 @@ void render(Window * window) {
 
 void loop(const float fps) {
     if (!pause_flag) {
-        points.step(fps);
+        points.step(1E-3, old_method);
     }
 }
 
@@ -122,7 +126,9 @@ void keyboard(GLFWwindow * window, int key, int scancode, int action, int mods) 
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
         pause_flag = !pause_flag;
     }
-    // if (key == GLFW_KEY)
+    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
+        old_method = !old_method;
+    }
 }
 
 int main() {
