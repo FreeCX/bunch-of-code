@@ -1,6 +1,7 @@
 #include "vertex.hpp"
 
-void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size, const GLint c_size, const GLint count) {
+void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size, const GLint c_size,
+                         const GLint count) {
     _count = count;
 
     // буферы для данных
@@ -36,7 +37,7 @@ void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size,
     if (c != nullptr) {
         // 1
         glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[1]);
-        glVertexAttribPointer(1, c_size, GL_FLOAT, GL_FALSE, 0, NULL);   
+        glVertexAttribPointer(1, c_size, GL_FLOAT, GL_FALSE, 0, NULL);
     }
 }
 

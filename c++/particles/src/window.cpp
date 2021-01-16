@@ -14,7 +14,7 @@ void Window::window_sleep() {
     frame_start = glfwGetTime();
 }
 
-void Window::init_window(const char * caption, uint16_t width, uint16_t height) {
+void Window::init_window(const char *caption, uint16_t width, uint16_t height) {
     w_width = width;
     w_height = height;
 
@@ -97,30 +97,16 @@ void Window::loop(float fps) {
     glfwTerminate();
 }
 
-void Window::render(void (*render_func)(Window * window)) {
-    render_callback = render_func;
-}
+void Window::render(void (*render_func)(Window *window)) { render_callback = render_func; }
 
-void Window::init_gl(void (*init_func)(void)) {
-    init_callback = init_func;
-}
+void Window::init_gl(void (*init_func)(void)) { init_callback = init_func; }
 
-void Window::keyboard(void (*keyboard_func)(GLFWwindow *, int, int, int, int)) {
-    keyboard_callback = keyboard_func;
-}
+void Window::keyboard(void (*keyboard_func)(GLFWwindow *, int, int, int, int)) { keyboard_callback = keyboard_func; }
 
-void Window::mouse(void (*mouse_func)(GLFWwindow *, int, int, int)) {
-    mouse_callback = mouse_func;
-}
+void Window::mouse(void (*mouse_func)(GLFWwindow *, int, int, int)) { mouse_callback = mouse_func; }
 
-void Window::user(void (*user_func)(const GLfloat)) {
-    user_callback = user_func;
-}
+void Window::user(void (*user_func)(const GLfloat)) { user_callback = user_func; }
 
-float Window::get_fps() {
-    return real_fps;
-}
+float Window::get_fps() { return real_fps; }
 
-float Window::get_user_time() {
-    return user_time;
-}
+float Window::get_user_time() { return user_time; }

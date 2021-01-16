@@ -1,18 +1,17 @@
-#include <vector>
-#include "window.hpp"
-#include "shader.hpp"
-#include "vertex.hpp"
 #include "font.hpp"
 #include "points.hpp"
+#include "shader.hpp"
+#include "vertex.hpp"
+#include "window.hpp"
+#include <vector>
 
 const uint16_t w_width = 800;
 const uint16_t w_height = 800;
-const GLfloat PIXEL_SIZE = 3.0f;
-const GLfloat k = 1E-3f;
-const int SIZE = 8;
+const GLfloat PIXEL_SIZE = 5.0f;
+const int SIZE = 12;
 const uint16_t MAX_FRAME_SKIP = 3;
 const uint16_t particle_count = 3000;
-const char * method[] = {"grid", "n^2"};
+const char *method[] = {"grid", "n^2"};
 
 ShaderProgram base_shader;
 ShaderProgram point_shader;
@@ -30,8 +29,8 @@ bool old_method = false;
 std::vector<GLfloat> generate_grid(GLuint vlines, GLuint hlines, float r) {
     const uint32_t ncoords = 4;
     const uint32_t elements_count = ncoords * (vlines + hlines);
-    const float vgrid_step = 2.0 * r / ((float) hlines - 1.0);
-    const float hgrid_step = 2.0 * r / ((float) vlines - 1.0);
+    const float vgrid_step = 2.0 * r / ((float)hlines - 1.0);
+    const float hgrid_step = 2.0 * r / ((float)vlines - 1.0);
     std::vector<GLfloat> grid_data;
 
     grid_data.resize(elements_count);
@@ -55,6 +54,30 @@ std::vector<GLfloat> generate_grid(GLuint vlines, GLuint hlines, float r) {
     return grid_data;
 }
 
+glm::vec3 hsv2rgb(glm::vec3 hsv) {
+    float fC = hsv.z * hsv.y;
+    float fHPrime = fmod(hsv.x / 60.0, 6);
+    float fX = fC * (1 - fabs(fmod(fHPrime, 2) - 1));
+    float fM = hsv.z - fC;
+    glm::vec3 rgb = {0, 0, 0};
+
+    if (0 <= fHPrime && fHPrime < 1) {
+        rgb = {fC, fX, 0};
+    } else if (1 <= fHPrime && fHPrime < 2) {
+        rgb = {fX, fC, 0};
+    } else if (2 <= fHPrime && fHPrime < 3) {
+        rgb = {0, fC, fX};
+    } else if (3 <= fHPrime && fHPrime < 4) {
+        rgb = {0, fX, fC};
+    } else if (4 <= fHPrime && fHPrime < 5) {
+        rgb = {fX, 0, fC};
+    } else if (5 <= fHPrime && fHPrime < 6) {
+        rgb = {fC, 0, fX};
+    }
+
+    return rgb + glm::vec3(fM, fM, fM);
+}
+
 void init(void) {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
@@ -74,17 +97,17 @@ void init(void) {
     font.shader("assets/text_vertex.glsl", "assets/text_fragment.glsl");
     font.load("assets/FiraSans-Medium.ttf", 18);
 
+    float hue = 0.0f;
+    float step = 360.0f / particle_count;
     for (int i = 0; i < particle_count; i++) {
-        float r = (rand() % 80 + 20) / 100.0f;
-        float g = (rand() % 80 + 20) / 100.0f;
-        float b = (rand() % 80 + 20) / 100.0f;
-        colors[i] = glm::vec3(r, g, b);
+        colors[i] = hsv2rgb(glm::vec3(hue, 1, 1));
+        hue += step;
     }
 }
 
 void deinit() {}
 
-void render(Window * window) {
+void render(Window *window) {
     static float current_fps = 0.0f;
     static float current_user_time = 0.0f;
     static uint16_t frame_skip = 0;
@@ -93,7 +116,7 @@ void render(Window * window) {
         current_fps = window->get_fps();
         current_user_time = window->get_user_time();
         frame_skip = MAX_FRAME_SKIP;
-    } 
+    }
 
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_ALPHA_TEST);
@@ -116,13 +139,8 @@ void render(Window * window) {
     point.render(GL_POINTS);
 
     char buff[64];
-    sprintf(buff, "fps: %.0f", current_fps);
-    font.render(buff, glm::vec3(10.0f, 70.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    sprintf(buff, "phys: %.2f ms", current_user_time);
-    font.render(buff, glm::vec3(10.0f, 50.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    sprintf(buff, "particles: %d", particle_count);
-    font.render(buff, glm::vec3(10.0f, 30.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-    sprintf(buff, "method: %s", method[old_method]);
+    sprintf(buff, "particles: %d; method: %s; fps: %.0f; phys: %.2f", particle_count, method[old_method], current_fps,
+            current_user_time);
     font.render(buff, glm::vec3(10.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     glDisable(GL_BLEND);
@@ -135,7 +153,7 @@ void loop(const float fps) {
     }
 }
 
-void keyboard(GLFWwindow * window, int key, int scancode, int action, int mods) {
+void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(window, true);
     }
@@ -147,12 +165,15 @@ void keyboard(GLFWwindow * window, int key, int scancode, int action, int mods) 
     }
 }
 
-void mouse(GLFWwindow * window, int button, int action, int mods) {
+void mouse(GLFWwindow *window, int button, int action, int mods) {
+    const GLfloat k = 2000.0f;
+    const GLfloat s = 0.2f;
+
     if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
         glm::vec2 pos = {(2 * xpos - w_width) / w_width, -(2 * ypos - w_height) / w_height};
-        points.explode(pos, k);
+        points.explode(pos, s, k);
     }
 }
 

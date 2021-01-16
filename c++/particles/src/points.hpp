@@ -1,11 +1,11 @@
 #pragma once
-#include <cmath>
 #include <GL/gl.h>
+#include <cmath>
 #include <glm/geometric.hpp>
 #include <glm/vec2.hpp>
-#include <vector>
 #include <map>
 #include <set>
+#include <vector>
 
 class Points {
     const float bounce = 0.5f;
@@ -28,10 +28,11 @@ class Points {
     inline void push(int index, glm::vec2 delta);
     inline int index(int i, glm::vec2 p);
     inline std::set<int> get_indexes(int i);
-public:
+
+  public:
     Points(const uint16_t, const float, const float, const float);
     ~Points();
     void step(const float, bool);
-    void explode(glm::vec2 pos, GLfloat k);
+    void explode(glm::vec2 pos, GLfloat s, GLfloat k);
     std::vector<glm::vec2> points() { return position; }
 };

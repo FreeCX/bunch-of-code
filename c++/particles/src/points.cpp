@@ -1,11 +1,12 @@
 #include "points.hpp"
 
-Points::Points(const uint16_t count, const float psize, const float sx, const float sy) : pixel_size(psize), sx(sx), sy(sy) {
+Points::Points(const uint16_t count, const float psize, const float sx, const float sy)
+    : pixel_size(psize), sx(sx), sy(sy) {
     magic_radius = 0.6f * pixel_size;
     auto px = -sx;
     auto py = -sy;
-    auto kx = 2 * magic_radius;
-    auto ky = 2 * magic_radius;
+    auto kx = 1.2f * magic_radius;
+    auto ky = 1.2f * magic_radius;
     position.reserve(count);
     deltaPos.reserve(count);
     acceleration.reserve(count);
@@ -97,7 +98,7 @@ void Points::step(const float dt, bool old = false) {
         grid.clear();
         for (auto i = 0; i < position.size(); i++) {
             auto indexes = get_indexes(i);
-            for (auto & index : indexes) {
+            for (auto &index : indexes) {
                 if (grid.find(index) != grid.end()) {
                     grid[index].insert(i);
                 } else {
@@ -106,7 +107,7 @@ void Points::step(const float dt, bool old = false) {
             }
         }
 
-        for (auto & block : grid) {
+        for (auto &block : grid) {
             for (auto i = block.second.begin(); i != block.second.end(); i++) {
                 // TODO: rewrite this
                 for (auto j = i; j != block.second.end(); j++) {
@@ -135,26 +136,26 @@ inline std::set<int> Points::get_indexes(int i) {
         position[i] + glm::vec2(magic_radius, magic_radius),
     };
     std::set<int> indexes;
-    for (auto & p : positions) {
+    for (auto &p : positions) {
         indexes.insert(index(i, p));
     }
     return indexes;
 }
 
-inline int Points::index(int i, glm::vec2 p) {
-    return ((ssy + p.y) * width + (ssx + p.x)) / grid_size;
-}
+inline int Points::index(int i, glm::vec2 p) { return ((ssy + p.y) * width + (ssx + p.x)) / grid_size; }
 
 inline void Points::push(int index, glm::vec2 delta) {
     position[index] += delta;
     deltaPos[index] += delta;
 }
 
-void Points::explode(glm::vec2 pos, GLfloat k) {
+void Points::explode(glm::vec2 pos, GLfloat size, GLfloat k) {
     for (int i = 0; i < position.size(); i++) {
         glm::vec2 delta = position[i] - pos;
         glm::vec2 n = glm::normalize(delta);
         auto r = glm::length(delta);
-        push(i, k * n / r);
+        if (r < size) {
+            push(i, n / (k * r));
+        }
     }
 }
