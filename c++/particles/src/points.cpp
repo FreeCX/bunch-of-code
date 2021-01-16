@@ -1,19 +1,28 @@
 #include "points.hpp"
 
-Points::Points(const uint16_t count, const float psize, const float sx, const float sy)
+Points::Points(const uint16_t count, const float psize, const float sx, const float sy, bool randomize)
     : pixel_size(psize), sx(sx), sy(sy) {
     magic_radius = 0.6f * pixel_size;
     auto px = -sx;
     auto py = -sy;
     auto kx = 1.2f * magic_radius;
     auto ky = 1.2f * magic_radius;
+    ssx = sx + 0.1f;
+    ssy = sy + 0.1f;
+    width = ssy / grid_size;
+
     position.reserve(count);
     deltaPos.reserve(count);
     acceleration.reserve(count);
+
     for (uint16_t i = 0; i < count; i++) {
-        auto rx = (rand() % 100 - 50) / 10000.0f;
-        auto ry = (rand() % 100 - 50) / 10000.0f;
-        position.push_back({px + rx, py + ry});
+        if (randomize) {
+            auto rx = (rand() % 100 - 50) / 10000.0f;
+            auto ry = (rand() % 100 - 50) / 10000.0f;
+            position.push_back({px + rx, py + ry});
+        } else {
+            position.push_back({px, py});
+        }
         deltaPos.push_back({0.0f, 0.0f});
         acceleration.push_back({0.0f, -10.0f});
         if (sx - px < delta) {
@@ -23,10 +32,6 @@ Points::Points(const uint16_t count, const float psize, const float sx, const fl
             px += kx;
         }
     }
-
-    ssx = sx + 0.1f;
-    ssy = sy + 0.1f;
-    width = ssy / grid_size;
 }
 
 Points::~Points() {

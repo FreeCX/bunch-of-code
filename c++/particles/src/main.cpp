@@ -5,11 +5,15 @@
 #include "window.hpp"
 #include <vector>
 
+const float pixel_size = 5.0f;
+const float scale_size = 12.0f * 15.0f;
+const float point_size = pixel_size / scale_size;
+const float phys_box_size = 0.9f;
+
+const int grid_count = 20;
 const uint16_t w_width = 800;
 const uint16_t w_height = 800;
-const GLfloat PIXEL_SIZE = 5.0f;
-const int SIZE = 12;
-const uint16_t MAX_FRAME_SKIP = 3;
+const uint16_t max_frame_skip = 3;
 const uint16_t particle_count = 3000;
 const char *method[] = {"grid", "n^2"};
 
@@ -17,11 +21,12 @@ ShaderProgram base_shader;
 ShaderProgram point_shader;
 Vertex data;
 Vertex point;
-
-Points points(particle_count, PIXEL_SIZE / (SIZE * 15), 0.9f, 0.9f);
-std::vector<glm::vec3> colors(particle_count);
-
 Font font(w_width, w_height);
+
+glm::vec4 grid_color = {1.0f, 1.0f, 1.0f, 0.2f};
+
+Points points(particle_count, point_size, phys_box_size, phys_box_size, false);
+std::vector<glm::vec3> colors(particle_count);
 
 bool pause_flag = false;
 bool old_method = false;
@@ -91,7 +96,7 @@ void init(void) {
     point_shader.addShader("assets/point_fragment.glsl", GL_FRAGMENT_SHADER);
     point_shader.link();
 
-    auto grid = generate_grid(SIZE, SIZE, 1);
+    auto grid = generate_grid(grid_count, grid_count, 1);
     data.load_vertex((GLfloat *)grid.data(), nullptr, 2, 0, grid.size() / 2);
 
     font.shader("assets/text_vertex.glsl", "assets/text_fragment.glsl");
@@ -115,7 +120,7 @@ void render(Window *window) {
     if (frame_skip-- == 0) {
         current_fps = window->get_fps();
         current_user_time = window->get_user_time();
-        frame_skip = MAX_FRAME_SKIP;
+        frame_skip = max_frame_skip;
     }
 
     glClear(GL_COLOR_BUFFER_BIT);
@@ -125,13 +130,13 @@ void render(Window *window) {
 
     /* отрисовка сцены */
     base_shader.run();
-    base_shader.uniform("in_color", glm::vec4(1.0f, 1.0f, 1.0f, 0.2f));
+    base_shader.uniform("in_color", grid_color);
     data.render(GL_LINES);
 
     /* отрисовка точек */
     point_shader.run();
     // лучше так не делать
-    glPointSize(PIXEL_SIZE);
+    glPointSize(pixel_size);
 
     // подготовка данных для рендера
     auto p = points.points();

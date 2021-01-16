@@ -30,7 +30,7 @@ class Points {
     inline std::set<int> get_indexes(int i);
 
   public:
-    Points(const uint16_t, const float, const float, const float);
+    Points(const uint16_t, const float, const float, const float, bool);
     ~Points();
     void step(const float, bool);
     void explode(glm::vec2 pos, GLfloat s, GLfloat k);
