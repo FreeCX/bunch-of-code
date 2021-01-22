@@ -1,19 +1,23 @@
 #include "vertex.hpp"
 
-void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size, const GLint c_size,
-                         const GLint count) {
+Vertex::~Vertex() {
+    glDeleteBuffers(_buffers, vbo_handles);
+    glDeleteVertexArrays(1, &vao_handles);
+}
+
+void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size, const GLint c_size, const GLint count,
+                         bool dynamic) {
     _count = count;
+    _vsize = v_size;
+    _buffers = (c == nullptr) ? 1 : 2;
+    auto draw_type = dynamic ? GL_STREAM_DRAW : GL_STATIC_DRAW;
 
     // буферы для данных
-    if (c == nullptr) {
-        glGenBuffers(1, vbo_handles);
-    } else {
-        glGenBuffers(2, vbo_handles);
-    }
+    glGenBuffers(_buffers, vbo_handles);
 
     // vertex
     glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[0]);
-    glBufferData(GL_ARRAY_BUFFER, v_size * count * sizeof(GLfloat), v, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, v_size * count * sizeof(GLfloat), v, draw_type);
 
     if (c != nullptr) {
         // color
@@ -39,6 +43,11 @@ void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size,
         glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[1]);
         glVertexAttribPointer(1, c_size, GL_FLOAT, GL_FALSE, 0, NULL);
     }
+}
+
+void Vertex::update(const GLfloat *v) {
+    glBindBuffer(GL_ARRAY_BUFFER, vbo_handles[0]);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, _vsize * _count * sizeof(GLfloat), v);
 }
 
 void Vertex::render(const GLuint type) {

@@ -49,23 +49,6 @@ void Window::init_window(const char *caption, uint16_t width, uint16_t height) {
     glViewport(0, 0, w_width, w_height);
 }
 
-void Window::render_main_thread() {
-    if (render_callback) {
-        render_callback(this);
-    }
-    window_sleep();
-    glfwSwapBuffers(window);
-}
-
-void Window::user_main_thread() {
-    if (user_callback) {
-        auto start = glfwGetTime();
-        user_callback(fps);
-        auto end = glfwGetTime();
-        this->user_time = (end - start) * 1E3;
-    }
-}
-
 void Window::loop(float fps) {
     this->fps = fps;
     if (init_callback) {
@@ -84,6 +67,7 @@ void Window::loop(float fps) {
         if (render_callback) {
             render_callback(this);
         }
+        glfwSwapBuffers(window);
         if (user_callback) {
             auto start = glfwGetTime();
             user_callback(fps);
@@ -91,7 +75,6 @@ void Window::loop(float fps) {
             this->user_time = (end - start) * 1E3;
         }
         window_sleep();
-        glfwSwapBuffers(window);
     }
 
     glfwTerminate();

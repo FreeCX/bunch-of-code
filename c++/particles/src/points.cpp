@@ -1,7 +1,7 @@
 #include "points.hpp"
 
 Points::Points(const uint16_t count, const float psize, const float sx, const float sy, bool randomize)
-    : pixel_size(psize), sx(sx), sy(sy) {
+    : pixel_size(psize), sx(sx), sy(sy), count(count) {
     magic_radius = 0.6f * pixel_size;
     auto px = -sx;
     auto py = -sy;
@@ -11,20 +11,20 @@ Points::Points(const uint16_t count, const float psize, const float sx, const fl
     ssy = sy + 0.1f;
     width = ssy / grid_size;
 
-    position.reserve(count);
-    deltaPos.reserve(count);
-    acceleration.reserve(count);
+    position = new glm::vec2[count];
+    delta_pos = new glm::vec2[count];
+    acceleration = new glm::vec2[count];
 
     for (uint16_t i = 0; i < count; i++) {
         if (randomize) {
             auto rx = (rand() % 100 - 50) / 10000.0f;
             auto ry = (rand() % 100 - 50) / 10000.0f;
-            position.push_back({px + rx, py + ry});
+            position[i] = {px + rx, py + ry};
         } else {
-            position.push_back({px, py});
+            position[i] = {px, py};
         }
-        deltaPos.push_back({0.0f, 0.0f});
-        acceleration.push_back({0.0f, -10.0f});
+        delta_pos[i] = {0.0f, 0.0f};
+        acceleration[i] = {0.0f, -10.0f};
         if (sx - px < delta) {
             py += ky;
             px = -sx;
@@ -35,9 +35,9 @@ Points::Points(const uint16_t count, const float psize, const float sx, const fl
 }
 
 Points::~Points() {
-    position.clear();
-    deltaPos.clear();
-    acceleration.clear();
+    delete[] acceleration;
+    delete[] delta_pos;
+    delete[] position;
 }
 
 inline glm::vec2 Points::speed_limit(glm::vec2 a) {
@@ -57,20 +57,20 @@ inline void Points::collide(int i, int j) {
         float depth = magic_radius - r;
         push(i, -n * depth * 0.5f);
         push(j, n * depth * 0.5f);
-        glm::vec2 rel_vel = deltaPos[i] - deltaPos[j];
+        glm::vec2 rel_vel = delta_pos[i] - delta_pos[j];
         float exchange_vel = (1.0f + bounce) * glm::dot(rel_vel, n);
         if (exchange_vel > 0) {
             auto f = speed_limit(n * exchange_vel * k);
-            deltaPos[i] += f;
-            deltaPos[j] -= f;
+            delta_pos[i] += f;
+            delta_pos[j] -= f;
         }
     }
 }
 
 inline void Points::move(int i, float dt) {
     // перемещение частиый
-    deltaPos[i] += acceleration[i] * dt * dt;
-    position[i] += deltaPos[i];
+    delta_pos[i] += acceleration[i] * dt * dt;
+    position[i] += delta_pos[i];
     // - отталкивание от фиксированных границ
     glm::vec2 delta = {0, 0};
     if (position[i].x > sx) {
@@ -92,8 +92,8 @@ inline void Points::move(int i, float dt) {
 void Points::step(const float dt, bool old = false) {
     if (old) {
         // старый метод расчёта взаимодествий
-        for (auto i = 0; i < position.size(); i++) {
-            for (auto j = i + 1; j < position.size(); j++) {
+        for (auto i = 0; i < count; i++) {
+            for (auto j = i + 1; j < count; j++) {
                 collide(i, j);
             }
             move(i, dt);
@@ -101,7 +101,7 @@ void Points::step(const float dt, bool old = false) {
     } else {
         // новый метод
         grid.clear();
-        for (auto i = 0; i < position.size(); i++) {
+        for (auto i = 0; i < count; i++) {
             auto indexes = get_indexes(i);
             for (auto &index : indexes) {
                 if (grid.find(index) != grid.end()) {
@@ -113,34 +113,31 @@ void Points::step(const float dt, bool old = false) {
         }
 
         for (auto &block : grid) {
-            for (auto i = block.second.begin(); i != block.second.end(); i++) {
-                // TODO: rewrite this
-                for (auto j = i; j != block.second.end(); j++) {
-                    if (i != j) {
-                        collide(*i, *j);
-                    }
+            for (auto i = block.second.cbegin(); i != block.second.cend(); i++) {
+                auto j = i;
+                ++j;
+                for (; j != block.second.cend(); j++) {
+                    collide(*i, *j);
                 }
             }
         }
 
-        for (auto i = 0; i < position.size(); i++) {
+        for (auto i = 0; i < count; i++) {
             move(i, dt);
         }
     }
 }
 
-inline std::set<int> Points::get_indexes(int i) {
-    std::vector<glm::vec2> positions = {
-        // 1-----2
-        // ---3---
-        // 4-----5
+inline hashset Points::get_indexes(int i) {
+    glm::vec2 positions[4] = {
+        // 1---2
+        // 3---4
         position[i] + glm::vec2(-magic_radius, -magic_radius),
         position[i] + glm::vec2(magic_radius, -magic_radius),
-        position[i],
         position[i] + glm::vec2(-magic_radius, magic_radius),
         position[i] + glm::vec2(magic_radius, magic_radius),
     };
-    std::set<int> indexes;
+    hashset indexes;
     for (auto &p : positions) {
         indexes.insert(index(i, p));
     }
@@ -151,14 +148,17 @@ inline int Points::index(int i, glm::vec2 p) { return ((ssy + p.y) * width + (ss
 
 inline void Points::push(int index, glm::vec2 delta) {
     position[index] += delta;
-    deltaPos[index] += delta;
+    delta_pos[index] += delta;
 }
 
 void Points::explode(glm::vec2 pos, GLfloat size, GLfloat k) {
-    for (int i = 0; i < position.size(); i++) {
+    for (int i = 0; i < count; i++) {
         glm::vec2 delta = position[i] - pos;
         glm::vec2 n = glm::normalize(delta);
         auto r = glm::length(delta);
+        if (r < eps) {
+            continue;
+        }
         if (r < size) {
             push(i, n / (k * r));
         }

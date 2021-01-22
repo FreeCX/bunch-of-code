@@ -1,9 +1,11 @@
+#include <array>
+#include <vector>
+
 #include "font.hpp"
 #include "points.hpp"
 #include "shader.hpp"
 #include "vertex.hpp"
 #include "window.hpp"
-#include <vector>
 
 const float pixel_size = 5.0f;
 const float scale_size = 12.0f * 15.0f;
@@ -13,7 +15,7 @@ const float phys_box_size = 0.9f;
 const int grid_count = 20;
 const uint16_t w_width = 800;
 const uint16_t w_height = 800;
-const uint16_t max_frame_skip = 3;
+const uint16_t max_frame_skip = 5;
 const uint16_t particle_count = 3000;
 const char *method[] = {"grid", "n^2"};
 
@@ -26,7 +28,7 @@ Font font(w_width, w_height);
 glm::vec4 grid_color = {1.0f, 1.0f, 1.0f, 0.2f};
 
 Points points(particle_count, point_size, phys_box_size, phys_box_size, false);
-std::vector<glm::vec3> colors(particle_count);
+std::array<glm::vec3, particle_count * 3> colors;
 
 bool pause_flag = false;
 bool old_method = false;
@@ -102,12 +104,17 @@ void init(void) {
     font.shader("assets/text_vertex.glsl", "assets/text_fragment.glsl");
     font.load("assets/FiraSans-Medium.ttf", 18);
 
+    // инициализируем цвета точек
     float hue = 0.0f;
     float step = 360.0f / particle_count;
     for (int i = 0; i < particle_count; i++) {
         colors[i] = hsv2rgb(glm::vec3(hue, 1, 1));
         hue += step;
     }
+
+    // инициализируем буферы OpenGL
+    auto p = points.points();
+    point.load_vertex((GLfloat *)p, (GLfloat *)colors.data(), 2, 3, particle_count, true);
 }
 
 void deinit() {}
@@ -128,19 +135,19 @@ void render(Window *window) {
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-    /* отрисовка сцены */
+    // отрисовка сцены
     base_shader.run();
     base_shader.uniform("in_color", grid_color);
     data.render(GL_LINES);
 
-    /* отрисовка точек */
+    // отрисовка точек
     point_shader.run();
+
     // лучше так не делать
     glPointSize(pixel_size);
-
-    // подготовка данных для рендера
+    // обновление положений частиц в буфере OpenGL и рендеринг
     auto p = points.points();
-    point.load_vertex((GLfloat *)p.data(), (GLfloat *)colors.data(), 2, 3, p.size());
+    point.update((GLfloat *)p);
     point.render(GL_POINTS);
 
     char buff[96];
