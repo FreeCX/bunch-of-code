@@ -28,7 +28,7 @@ Font font(w_width, w_height);
 glm::vec4 grid_color = {1.0f, 1.0f, 1.0f, 0.2f};
 
 Points points(particle_count, point_size, phys_box_size, phys_box_size, false);
-std::array<glm::vec3, particle_count * 3> colors;
+std::array<glm::vec3, particle_count> colors;
 
 bool pause_flag = false;
 bool old_method = false;
