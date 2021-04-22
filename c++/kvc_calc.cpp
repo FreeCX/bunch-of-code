@@ -17,7 +17,8 @@ bytes ssl_calculate_kcv(const bytes &key) {
   DES_ecb2_encrypt(
       (const_DES_cblock *)input.data(), (const_DES_cblock *)output.data(), &keysched1, &keysched2, DES_ENCRYPT);
 
-  return output;
+  // need only 3 bytes
+  return bytes(output.begin(), output.begin() + 3);
 }
 
 bytes crypt(const bytes &data, const bytes &key, uint8_t encrypt) {
