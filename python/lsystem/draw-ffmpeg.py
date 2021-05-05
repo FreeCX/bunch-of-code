@@ -78,32 +78,48 @@ def prerender(cmds, angle, rules, border=10):
     return (width + 2 * border, height + 2 * border, shift_x + border, shift_y + border)
 
 
-def render(output, state, cmds, angle, rules):
+def render(output, state, cmds, angle, rules, steps):
     px, py, lx, ly = [0] * 4
     w, h, sx, sy = state
 
     img = Image.new('RGB', (w, h), 'white')
     drw = ImageDraw.Draw(img)
-    render = ffmpeg(fps=24, output=output)
+    render = ffmpeg(fps=25, output=output)
 
     for symbol in cmds:
         px, py, angle = execute(px, py, angle, symbol, rules)
-        drw.line((lx + sx, ly + sy, px + sx, py + sy), fill=(0, 0, 0))
+
+        if px == lx and py == ly:
+            continue
+
+        deltaX = (px - lx) / steps
+        deltaY = (py - ly) / steps
+        for i in range(steps + 1):
+            pvx = lx + deltaX * i
+            pvy = ly + deltaY * i
+            if i == 0:
+                lvx, lvy = lx, ly
+            else:
+                lvx = lx + deltaX * (i - 1)
+                lvy = ly + deltaY * (i - 1)
+            drw.line((lvx + sx, lvy + sy, pvx + sx, pvy + sy), fill=(0, 0, 0))
+            render.push(img)
+
         lx, ly = px, py
-        render.push(img)
 
 
-def execute_model(filename, *, savename=None):
+def execute_model(filename, *, savename=None, steps=4):
     with open(filename, 'r') as jsf:
         data = json.load(jsf)
         result = generate(data['axiom'], data['iterations'], data['generate_rules'])
         state = prerender(result, data['start_angle'], data['draw_rules'])
-        render(savename, state, result, data['start_angle'], data['draw_rules'])
+        render(savename, state, result, data['start_angle'], data['draw_rules'], steps)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Draw L System model')
     parser.add_argument('-m', metavar='model', type=str, default=None, help='input model file')
+    parser.add_argument('-s', metavar='steps', type=int, default=4, help='line steps drawing (default: 4)')
     args = parser.parse_args()
     if args.m:
         renamer = lambda model: str(model).rsplit('.', 1)[0] + '.mp4'
@@ -111,9 +127,9 @@ if __name__ == '__main__':
         if model.is_dir():
             for file in model.iterdir():
                 print(f'> processing {file}')
-                execute_model(file, savename=renamer(file))
+                execute_model(file, savename=renamer(file), steps=args.s)
         else:
             print(f'> processing {model}')
-            execute_model(model, savename=renamer(model))
+            execute_model(model, savename=renamer(model), steps=args.s)
     else:
         parser.print_help()
