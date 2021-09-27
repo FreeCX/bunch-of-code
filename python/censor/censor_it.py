@@ -1,5 +1,7 @@
 from itertools import cycle
 from pathlib import Path
+import argparse
+
 from PIL import Image
 import numpy as np
 
@@ -13,10 +15,10 @@ def seed_from_key(key, max_seed=4096):
     return result
 
 
-def censor_it(img, mask, key):
-    filename = Path(img).stem
+def censor_it(input, mask, key, output=None):
+    filename = Path(input).stem
 
-    data = np.array(Image.open(img))
+    data = np.array(Image.open(input))
     mask = np.array(Image.open(mask))
 
     np.random.seed(seed_from_key(key))
@@ -45,8 +47,22 @@ def censor_it(img, mask, key):
         data[y, x][1] = 255 - data[y, x][1] ^ g[index + 3]
         data[y, x][2] = 255 - data[y, x][2] ^ g[index + 4]
 
-    Image.fromarray(data).save(filename + '_censored.png')
+    if output is None:
+        output = filename + '_censored.png'
+
+    Image.fromarray(data).save(output)
 
 
 if __name__ == '__main__':
-    censor_it('img.png', 'img_mask.png', 'deadbeef')
+
+    parser = argparse.ArgumentParser(description='reversable image censor')
+    parser.add_argument('-i', dest='input', metavar='image', type=Path, required=True, help='input image')
+    parser.add_argument('-m', dest='mask', metavar='mask', type=Path, required=True, help='mask image')
+    parser.add_argument('-c', dest='code', metavar='code', type=str, help='cipher key')
+    parser.add_argument('-o', dest='output', metavar='output', type=Path, help='output image')
+    parser.set_defaults(output=None)
+
+    args = parser.parse_args()
+
+    # censor_it('img.png', 'img_mask.png', 'deadbeef')
+    censor_it(args.input, args.mask, args.code, args.output)
