@@ -1,0 +1,12 @@
+# Content
+- [Generate heatmap image from adjacent matrix](./heatmap_drawer/)
+- [Matrix Rain](./matrix_rain/)
+- [Morse code generator](./morse/)
+- [Morse code generator UI](./morse-gui/)
+- [Geodate processing](./shapey/)
+- [Thunder distance calculator](distance.rs)
+- Fibbonachi sequence [example #1](fib_measure.rs) and [example #2](fib_sequence.rs)
+- [Simple password generator](pgen.rs)
+- [Simple tokenizer](tokenizer.rs)
+- [Xor shift demo](xor-shift.rs)
+- [Xoshiro256 implementation](xoshiro256ss.rs

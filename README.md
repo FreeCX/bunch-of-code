@@ -1,3 +1,10 @@
 # bunch-of-code
 
-Репозиторий с разными "полезными" наработками
+Repo with "useful" pieces of code
+
+## Content
+- [C](./c/)
+- [C++](./c++/)
+- [Python](./python/)
+- [Rust](./rust/)
+- [Shell scripts](./scripts/)
