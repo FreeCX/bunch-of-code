@@ -9,4 +9,4 @@
 - [Simple password generator](pgen.rs)
 - [Simple tokenizer](tokenizer.rs)
 - [Xor shift demo](xor-shift.rs)
-- [Xoshiro256 implementation](xoshiro256ss.rs
+- [Xoshiro256 implementation](xoshiro256ss.rs)
