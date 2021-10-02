@@ -21,4 +21,4 @@
 - [Generate timelapse command for ffmpeg](timelapse.py)
 - [Make transition from one image to another with ffmpeg](transition.py)
 - [Some code generator](ugly-code-generator.py)
-- [Wav freq extractor](wav_to_freq.py
+- [Wav freq extractor](wav_to_freq.py)
