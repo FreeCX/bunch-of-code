@@ -8,6 +8,7 @@
 - [Birch code generator](birch.py)
 - [Split djvu document page in half](djvu_split.py)
 - [Four fours problem](four_fours_problem.py)
+- [Grid layout demo](grid.py)
 - [Hex wallpaper generator](hex_picture.py)
 - [Proportional image size](img_resize.py)
 - [Joyreactor banner crop](joycrop.py)
