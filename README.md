@@ -8,3 +8,4 @@ Repo with "useful" pieces of code
 - [Python](./python/)
 - [Rust](./rust/)
 - [Shell scripts](./scripts/)
+- [Other](./other/)
