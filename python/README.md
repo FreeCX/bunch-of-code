@@ -19,6 +19,7 @@
 - [Progress bar demo](progress_bar.py)
 - [Palette generator](pycolor.py)
 - [Geodate processing script](shape.py) ([see this](../rust/shapey/))
+- [Find similar images](similarity.py)
 - [Generate timelapse command for ffmpeg](timelapse.py)
 - [Make transition from one image to another with ffmpeg](transition.py)
 - [Some code generator](ugly-code-generator.py)
