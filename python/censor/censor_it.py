@@ -33,7 +33,7 @@ def censor_it(input, mask, key, output=None):
         y = xy // data.shape[1]
 
         p1, p2 = pk.__next__(), pk.__next__()
-        
+
         if index % 3 == 0:
             data[y, x][0] ^= g[index + 0] ^ p1
             data[y, x][1] ^= g[index + 1] ^ p2
@@ -48,18 +48,18 @@ def censor_it(input, mask, key, output=None):
         data[y, x][2] = 255 - data[y, x][2] ^ g[index + 4]
 
     if output is None:
-        output = filename + '_censored.png'
+        output = filename + "_censored.png"
 
     Image.fromarray(data).save(output)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser(description='reversable image censor')
-    parser.add_argument('-i', dest='input', metavar='image', type=Path, required=True, help='input image')
-    parser.add_argument('-m', dest='mask', metavar='mask', type=Path, required=True, help='mask image')
-    parser.add_argument('-c', dest='code', metavar='code', type=str, help='cipher key')
-    parser.add_argument('-o', dest='output', metavar='output', type=Path, help='output image')
+    parser = argparse.ArgumentParser(description="reversable image censor")
+    parser.add_argument("-i", dest="input", metavar="image", type=Path, required=True, help="input image")
+    parser.add_argument("-m", dest="mask", metavar="mask", type=Path, required=True, help="mask image")
+    parser.add_argument("-c", dest="code", metavar="code", type=str, help="cipher key")
+    parser.add_argument("-o", dest="output", metavar="output", type=Path, help="output image")
     parser.set_defaults(output=None)
 
     args = parser.parse_args()

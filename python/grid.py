@@ -82,7 +82,7 @@ def generate_palette(*, saturation=1.0, brightness=0.6, count=3):
     return colors
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     width, height = 500, 200
 
     grid = Grid(width, height)
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     grid.calculate()
 
     colors = generate_palette(count=grid.rows() * grid.cols())
-    img = Image.new('RGBA', (width, height), (255, 255, 255, 0))
+    img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
     drw = ImageDraw.Draw(img)
 
     index = 0
@@ -102,4 +102,4 @@ if __name__ == '__main__':
             drw.rectangle(rect, fill=colors[index])
             index += 1
 
-    img.save('grid.png')
+    img.save("grid.png")

@@ -36,39 +36,39 @@ def find_ids(input_data):
 def generate_file(poly_size=1300, point_size=1000):
     polygons = generate_polygons_raw(n=poly_size)
     points = generate_points_raw(n=point_size)
-    js.dump({'points': points, 'polygons': polygons}, open('result.json', 'w'))
+    js.dump({"points": points, "polygons": polygons}, open("result.json", "w"))
 
 
 def generate_data(poly_size=1300, point_size=1000):
-    print('> generating polygons')
+    print("> generating polygons")
     polygons = generate_polygons(n=poly_size)
-    print('> generating points')
+    print("> generating points")
     points = generate_points(n=point_size)
     return polygons, points
 
 
-def load_from_file(file='result.json'):
+def load_from_file(file="result.json"):
     data = js.load(open(file))
-    polygons = [Polygon(poly) for poly in data['polygons']]
-    points = [Point(point) for point in data['points']]
+    polygons = [Polygon(poly) for poly in data["polygons"]]
+    points = [Point(point) for point in data["points"]]
     return polygons, points
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     from_file = True
     if from_file:
         polygons, points = load_from_file()
     else:
         polygons, points = generate_data()
     pool = ThreadPool(THREAD_COUNT)
-    print('> data preprocessing')
+    print("> data preprocessing")
     data = ((polygons, point) for point in points)
-    print('> calculating')
+    print("> calculating")
     start = time()
     result = pool.map(find_ids, data)
     stop = time()
-    print(f'--- DONE ---\ntime elapsed: {stop - start:.4f} seconds')
-    
-    with open('result-python.txt', 'w') as f:
+    print(f"--- DONE ---\ntime elapsed: {stop - start:.4f} seconds")
+
+    with open("result-python.txt", "w") as f:
         for index, item in enumerate(result):
-            f.write(f'{index}: {item}\n')
+            f.write(f"{index}: {item}\n")

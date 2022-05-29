@@ -30,4 +30,6 @@ def exp_func_01(x):
 
 def exp_func_02(x):
     return triangle(0.1 * x * np.sin(x))
+
+
 # end of funcs

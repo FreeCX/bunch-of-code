@@ -14,30 +14,41 @@ def write_wav(output, sample_rate, data):
     bit_per_sample = 8
     byte_per_sample = 1
     num_channels = 1
-    wav_size = st.pack('<I', data.shape[0] + 44 - 8)
-    fmt_chunk_size = st.pack('<I', 16)
-    audio_format = st.pack('<H', 1)
-    byte_rate = st.pack('<I', sample_rate * num_channels * byte_per_sample)
-    sample_aligment = st.pack('<H', num_channels * byte_per_sample)
-    num_channels = st.pack('<H', num_channels)
-    sample_rate = st.pack('<I', sample_rate)
-    bit_depth = st.pack('<H', bit_per_sample)
-    header = b'RIFF' + wav_size + b'WAVEfmt ' + fmt_chunk_size + audio_format + num_channels + \
-        sample_rate + byte_rate + sample_aligment + bit_depth + b'data'
-    with open(output, 'wb') as f:
+    wav_size = st.pack("<I", data.shape[0] + 44 - 8)
+    fmt_chunk_size = st.pack("<I", 16)
+    audio_format = st.pack("<H", 1)
+    byte_rate = st.pack("<I", sample_rate * num_channels * byte_per_sample)
+    sample_aligment = st.pack("<H", num_channels * byte_per_sample)
+    num_channels = st.pack("<H", num_channels)
+    sample_rate = st.pack("<I", sample_rate)
+    bit_depth = st.pack("<H", bit_per_sample)
+    header = (
+        b"RIFF"
+        + wav_size
+        + b"WAVEfmt "
+        + fmt_chunk_size
+        + audio_format
+        + num_channels
+        + sample_rate
+        + byte_rate
+        + sample_aligment
+        + bit_depth
+        + b"data"
+    )
+    with open(output, "wb") as f:
         f.write(header)
         f.write(data)
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Wav to freq converter')
-    parser.add_argument('-i', '--input', help='input wav file', default=None)
-    parser.add_argument('-o', '--output', help='output freq file', default=None)
-    parser.add_argument('-d', '--chunk', type=int, help='split data by chunks', default=100)
-    parser.add_argument('-c', '--count', type=int, help='output count of freqs', default=3)
-    parser.add_argument('-l', '--lower', type=int, help='lower freq', default=1000)
-    parser.add_argument('-n', '--numb', type=int, help='lower border of freq', default=300)
-    parser.add_argument('-s', '--sample_rate', type=int, help='input file sample rate', default=44100)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Wav to freq converter")
+    parser.add_argument("-i", "--input", help="input wav file", default=None)
+    parser.add_argument("-o", "--output", help="output freq file", default=None)
+    parser.add_argument("-d", "--chunk", type=int, help="split data by chunks", default=100)
+    parser.add_argument("-c", "--count", type=int, help="output count of freqs", default=3)
+    parser.add_argument("-l", "--lower", type=int, help="lower freq", default=1000)
+    parser.add_argument("-n", "--numb", type=int, help="lower border of freq", default=300)
+    parser.add_argument("-s", "--sample_rate", type=int, help="input file sample rate", default=44100)
     parser.set_defaults(handler=lambda args: parser.print_help())
     args = parser.parse_args()
 
@@ -49,7 +60,7 @@ if __name__ == '__main__':
     step = args.sample_rate // args.chunk
     freq_data = []
     for start in range(0, data.shape[0], step):
-        signal = data[start:start + step]
+        signal = data[start : start + step]
         N = signal.shape[0]
         secs = N / float(args.sample_rate)
         Ts = 1.0 / args.sample_rate
@@ -74,15 +85,15 @@ if __name__ == '__main__':
 
     if args.output:
         music = []
-        f = open(f'{args.output}.freq', 'w')
-        f.write('# dt freq_1 freq_2 ... freq_N\n')
+        f = open(f"{args.output}.freq", "w")
+        f.write("# dt freq_1 freq_2 ... freq_N\n")
         for step, freqs in freq_data:
-            freq_join = ' '.join(map(str, freqs))
-            f.write(f'{step} {freq_join}\n')
+            freq_join = " ".join(map(str, freqs))
+            f.write(f"{step} {freq_join}\n")
             for freq in freqs:
                 duration = int(step // len(freqs))
                 signal = sine(freq, args.sample_rate, t=np.arange(duration))
                 music.extend(signal)
         f.close()
         music = np.array(music, dtype=np.uint8)
-        write_wav(f'{args.output}.wav', args.sample_rate, music)
+        write_wav(f"{args.output}.wav", args.sample_rate, music)

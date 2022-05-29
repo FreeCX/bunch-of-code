@@ -13,8 +13,8 @@ USE_BW = False
 # color params
 BIRCH_LINE_COLOR = 130
 BIRCH_BG_COLOR = 230
-BG_COLOR = 'white'
-MAIN_COLOR = 'black'
+BG_COLOR = "white"
+MAIN_COLOR = "black"
 
 # image params
 SIZE = 8
@@ -45,8 +45,8 @@ def to_symbol(block):
     if USE_GRAY_CODE:
         block = from_gray(block[:4]) + from_gray(block[4:])
     for index, item in enumerate(block[::-1]):
-        result += item * (2 ** index)
-    return result.to_bytes(length=1, byteorder='little')
+        result += item * (2**index)
+    return result.to_bytes(length=1, byteorder="little")
 
 
 def bits(x):
@@ -79,13 +79,13 @@ def draw_one(drw, size, index_x, c):
 def birch_code_encode(text):
     size = 26, 64
     img_size = (size[0] * len(text) + BORDER, size[1])
-    img = Image.new(mode='L', size=img_size, color=BG_COLOR)
+    img = Image.new(mode="L", size=img_size, color=BG_COLOR)
     drw = ImageDraw.Draw(img)
 
     for index, symbol in enumerate(text):
         draw_one(drw, size, index, symbol)
 
-    result = Image.new(mode='L', size=(img_size[0] + 2 * IMG_MARGIN, img_size[1] + 2 * IMG_MARGIN), color=BG_COLOR)
+    result = Image.new(mode="L", size=(img_size[0] + 2 * IMG_MARGIN, img_size[1] + 2 * IMG_MARGIN), color=BG_COLOR)
     drw = ImageDraw.Draw(result)
     drw.point(xy=[(2, 2), (2, 4), (4, 2)], fill=MAIN_COLOR)
     result.paste(img, box=(IMG_MARGIN, IMG_MARGIN))
@@ -97,9 +97,9 @@ def birch_code_decode(filename):
     step_x, step_y = 26, 8
 
     if USE_BW:
-        img = np.array(Image.open(filename).convert('1'))
+        img = np.array(Image.open(filename).convert("1"))
     else:
-        img = np.array(Image.open(filename).convert('L'))
+        img = np.array(Image.open(filename).convert("L"))
     h, w = img.shape
 
     if USE_BW:
@@ -110,41 +110,41 @@ def birch_code_decode(filename):
     else:
         # remove birch background
         img[img > 200] = 255
-        # birch lines to black 
+        # birch lines to black
         img[img < 200] = 0
         # normalize
         img = 1 - img // 255
     # remove image margin
-    img = img[5:h-5,5:w-5]
+    img = img[5 : h - 5, 5 : w - 5]
 
     # collect bits
     data = []
     for x_window in range(0, img.shape[1] - step_x, step_x):
         for y_window in range(0, img.shape[0], step_y):
-            block = img[y_window:y_window + step_y,x_window + 2:x_window + step_x]
+            block = img[y_window : y_window + step_y, x_window + 2 : x_window + step_x]
             data.append(int(not block.any()))
 
     # convert to symbols
-    result = b''
-    for index in range(0, len(data), step_y ):
-        block = data[index:index + step_y]
+    result = b""
+    for index in range(0, len(data), step_y):
+        block = data[index : index + step_y]
         result += to_symbol(block)
 
     return result
 
 
-if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Generate Birch Code')
-    parser.add_argument('-e', dest='encode', metavar='encode', type=str, help='text to encode')
-    parser.add_argument('-f', dest='file', metavar='file', type=Path, help='file to encode')
-    parser.add_argument('-d', dest='decode', metavar='decode', type=str, help='input file')
-    parser.add_argument('-o', dest='output', metavar='output', type=str, help='output file')
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Generate Birch Code")
+    parser.add_argument("-e", dest="encode", metavar="encode", type=str, help="text to encode")
+    parser.add_argument("-f", dest="file", metavar="file", type=Path, help="file to encode")
+    parser.add_argument("-d", dest="decode", metavar="decode", type=str, help="input file")
+    parser.add_argument("-o", dest="output", metavar="output", type=str, help="output file")
 
     args = parser.parse_args()
     if args.encode and args.output:
         birch_code_encode(args.encode.encode()).save(args.output)
     elif args.file and args.output:
-        data = args.file.open('rb').read()
+        data = args.file.open("rb").read()
         birch_code_encode(data).save(args.output)
     elif args.decode:
         result = birch_code_decode(args.decode)

@@ -11,13 +11,14 @@ quit_flag = False
 window_size = (800, 800)
 
 
-
 def memoize(f):
     memory = {}
+
     def memoized(*args):
         if args not in memory:
             memory[args] = f(*args)
         return memory[args]
+
     return memoized
 
 
@@ -26,7 +27,7 @@ def get_basis(i, n, t):
     def f(n):
         return reduce(operator.mul, range(1, n), 1)
 
-    return (f(n) / (f(i) * f(n - i))) * (t ** i) * (1 - t) ** (n - i)
+    return (f(n) / (f(i) * f(n - i))) * (t**i) * (1 - t) ** (n - i)
 
 
 def get_curve(arr, step=0.01, need_to_round=False):
@@ -49,7 +50,7 @@ def get_curve(arr, step=0.01, need_to_round=False):
     return res
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     curve = get_curve(test_points, need_to_round=True)
     b_pos = 0
     m_pos = len(curve) - 1
@@ -58,7 +59,7 @@ if __name__ == '__main__':
     pygame.init()
 
     screen = pygame.display.set_mode(window_size)
-    pygame.display.set_caption('Bezier')
+    pygame.display.set_caption("Bezier")
     clock = pygame.time.Clock()
 
     surface = pygame.Surface(window_size)
