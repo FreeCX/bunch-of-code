@@ -37,9 +37,9 @@ class Window {
     uint16_t w_width;
     uint16_t w_height;
     GLFWwindow *window = nullptr;
-    void (*render_callback)(Window *);
-    void (*user_callback)(const GLfloat);
-    void (*init_callback)(void);
-    void (*keyboard_callback)(GLFWwindow *, int, int, int, int);
-    void (*mouse_callback)(GLFWwindow *, int, int, int);
+    void (*render_callback)(Window *) = nullptr;
+    void (*user_callback)(const GLfloat) = nullptr;
+    void (*init_callback)(void) = nullptr;
+    void (*keyboard_callback)(GLFWwindow *, int, int, int, int) = nullptr;
+    void (*mouse_callback)(GLFWwindow *, int, int, int) = nullptr;
 };

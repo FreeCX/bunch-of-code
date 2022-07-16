@@ -7,17 +7,21 @@
 #include "vertex.hpp"
 #include "window.hpp"
 
-const float pixel_size = 5.0f;
+const float pixel_size = 3.0f;
 const float scale_size = 12.0f * 15.0f;
-const float point_size = pixel_size / scale_size;
+const float scale_factor = 0.6f;
+const float phys_size = scale_factor * pixel_size / scale_size;
+const float point_scale_size = scale_size / scale_factor;
 const float phys_box_size = 0.9f;
+const float step_size = 1E-3;
 
 const int grid_count = 20;
 const uint16_t w_width = 800;
 const uint16_t w_height = 800;
 const uint16_t max_frame_skip = 5;
-const uint16_t particle_count = 3000;
-const char *method[] = {"grid", "n^2"};
+const uint16_t particle_count = 5000;
+const uint16_t walls_count = 22 * 5;
+const uint16_t total_count = particle_count + walls_count;
 
 ShaderProgram base_shader;
 ShaderProgram point_shader;
@@ -27,11 +31,11 @@ Font font(w_width, w_height);
 
 glm::vec4 grid_color = {1.0f, 1.0f, 1.0f, 0.2f};
 
-Points points(particle_count, point_size, phys_box_size, phys_box_size, false);
-std::array<glm::vec3, particle_count> colors;
+Points points(particle_count, walls_count, phys_size, phys_box_size, phys_box_size);
+std::array<glm::vec3, total_count> colors;
 
 bool pause_flag = false;
-bool old_method = false;
+glm::vec2 gravity_vec = {0.0f, -10.0f};
 
 std::vector<GLfloat> generate_grid(GLuint vlines, GLuint hlines, float r) {
     const uint32_t ncoords = 4;
@@ -111,10 +115,13 @@ void init(void) {
         colors[i] = hsv2rgb(glm::vec3(hue, 1, 1));
         hue += step;
     }
+    for (int i = 0; i < walls_count; i++) {
+        colors[particle_count + i] = {1.0, 1.0, 1.0};
+    }
 
     // инициализируем буферы OpenGL
     auto p = points.points();
-    point.load_vertex((GLfloat *)p, (GLfloat *)colors.data(), 2, 3, particle_count, true);
+    point.load_vertex((GLfloat *)p, (GLfloat *)colors.data(), 3, 3, total_count, true);
 }
 
 void deinit() {}
@@ -133,6 +140,7 @@ void render(Window *window) {
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_ALPHA_TEST);
     glEnable(GL_BLEND);
+    glEnable(GL_PROGRAM_POINT_SIZE);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     // отрисовка сцены
@@ -142,26 +150,26 @@ void render(Window *window) {
 
     // отрисовка точек
     point_shader.run();
-
-    // лучше так не делать
-    glPointSize(pixel_size);
+    point_shader.uniform("scale_size", point_scale_size);
     // обновление положений частиц в буфере OpenGL и рендеринг
     auto p = points.points();
     point.update((GLfloat *)p);
     point.render(GL_POINTS);
 
     char buff[96];
-    sprintf(buff, "particles: %d; method: %s; fps: %.0f; phys: %.2f ms", particle_count, method[old_method],
-            current_fps, current_user_time);
+    sprintf(buff, "particles: %d; fps: %3.0f; phys: %3.2f ms; gravity: (%3.2f, %3.2f)",
+        particle_count, current_fps, current_user_time, gravity_vec.x, gravity_vec.y);
     font.render(buff, glm::vec3(10.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
+    glDisable(GL_PROGRAM_POINT_SIZE);
     glDisable(GL_BLEND);
     glDisable(GL_ALPHA_TEST);
 }
 
 void loop(const float fps) {
     if (!pause_flag) {
-        points.step(1E-3, old_method);
+        // TODO: оптимизировать код для возможности вызыва несколько раз
+        points.step(step_size);
     }
 }
 
@@ -172,20 +180,30 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS) {
         pause_flag = !pause_flag;
     }
-    if (key == GLFW_KEY_M && action == GLFW_PRESS) {
-        old_method = !old_method;
+    if (key == GLFW_KEY_G && action == GLFW_PRESS) {
+        gravity_vec *= -1.0f;
+        points.gravity(gravity_vec);
+    }
+    if (key == GLFW_KEY_RIGHT) {
+        points.step(step_size);
     }
 }
 
 void mouse(GLFWwindow *window, int button, int action, int mods) {
-    const GLfloat k = 2000.0f;
-    const GLfloat s = 0.2f;
-
-    if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_PRESS) {
+    if (action == GLFW_PRESS) {
         double xpos, ypos;
         glfwGetCursorPos(window, &xpos, &ypos);
         glm::vec2 pos = {(2 * xpos - w_width) / w_width, -(2 * ypos - w_height) / w_height};
-        points.explode(pos, s, k);
+
+        if (button == GLFW_MOUSE_BUTTON_LEFT) {
+            gravity_vec = pos * 10.0f;
+            points.gravity(gravity_vec);
+        }
+        if (button == GLFW_MOUSE_BUTTON_RIGHT) {
+            const GLfloat s = 0.2f;
+            const GLfloat k = 2E-4;
+            points.explode(pos, s, k);
+        }
     }
 }
 

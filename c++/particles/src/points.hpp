@@ -1,31 +1,35 @@
 #pragma once
+#define GLM_FORCE_SWIZZLE
+#include <glm/glm.hpp>
 #include <GL/gl.h>
 #include <array>
 #include <cmath>
-#include <glm/geometric.hpp>
-#include <glm/vec2.hpp>
 #include <unordered_map>
 #include <unordered_set>
+
+#include <iostream>
 
 typedef std::unordered_set<int> hashset;
 typedef std::unordered_map<int, hashset> hashmap;
 
 class Points {
     const float bounce = 0.5f;
-    const float delta = 0.05f;
+    const float delta = 0.01f;
     const float eps = 1E-2;
     const float grid_size = 0.2f;
     const float k = 1E-2;
     const float limit_speed = 1E-1;
 
-    float magic_radius, pixel_size, sx, sy;
+    float sx, sy;
     float width, ssx, ssy;
-    int count;
+    int count, count1, count2;
 
     hashmap grid;
-    glm::vec2 *position = nullptr;
+    glm::vec2 acc = {0.0f, -10.0f};
+    glm::vec3 *position = nullptr;
     glm::vec2 *delta_pos = nullptr;
     glm::vec2 *acceleration = nullptr;
+    bool *movable = nullptr;
 
     inline glm::vec2 speed_limit(glm::vec2 a);
     inline void collide(int i, int j);
@@ -35,9 +39,10 @@ class Points {
     inline hashset get_indexes(int i);
 
   public:
-    Points(const uint16_t, const float, const float, const float, bool);
+    Points(const uint16_t, const uint16_t, const float, const float, const float);
     ~Points();
-    void step(const float, bool);
+    void step(const float);
+    void gravity(glm::vec2 g) { acc = g; }
     void explode(glm::vec2 pos, GLfloat s, GLfloat k);
-    glm::vec2 *points() { return position; }
+    glm::vec3 *points() { return position; }
 };
