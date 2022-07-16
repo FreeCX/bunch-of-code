@@ -5,8 +5,8 @@ Vertex::~Vertex() {
     glDeleteVertexArrays(1, &vao_handles);
 }
 
-void Vertex::load_vertex(const GLfloat *v, const GLfloat *c, const GLint v_size, const GLint c_size, const GLint count,
-                         bool dynamic) {
+void Vertex::load_vertex(
+    const GLfloat *v, const GLfloat *c, const GLint v_size, const GLint c_size, const GLint count, bool dynamic) {
     _count = count;
     _vsize = v_size;
     _buffers = (c == nullptr) ? 1 : 2;

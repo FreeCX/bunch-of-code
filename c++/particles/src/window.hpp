@@ -1,16 +1,14 @@
 #pragma once
 #include <chrono>
 #include <cmath>
-#include <stdint.h>
+#include <cstdint>
 #include <string>
 #include <thread>
-//
-// GLEW
+
 #define GLEW_STATIC
 #include <GL/glew.h>
-// GLFW
 #include <GLFW/glfw3.h>
-// ...
+
 #include "error.hpp"
 
 class Window {

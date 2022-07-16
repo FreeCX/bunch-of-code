@@ -157,8 +157,13 @@ void render(Window *window) {
     point.render(GL_POINTS);
 
     char buff[96];
-    sprintf(buff, "particles: %d; fps: %3.0f; phys: %3.2f ms; gravity: (%3.2f, %3.2f)",
-        particle_count, current_fps, current_user_time, gravity_vec.x, gravity_vec.y);
+    sprintf(buff,
+            "particles: %d; fps: %3.0f; phys: %3.2f ms; gravity: (%3.2f, %3.2f)",
+            particle_count,
+            current_fps,
+            current_user_time,
+            gravity_vec.x,
+            gravity_vec.y);
     font.render(buff, glm::vec3(10.0f, 10.0f, 0.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 
     glDisable(GL_PROGRAM_POINT_SIZE);

@@ -1,17 +1,18 @@
 #pragma once
-#include <GL/glew.h>
 #include <cstdint>
 #include <iostream>
 #include <map>
-// OpenGL
+
+#include <GL/glew.h>
+
 #include <GL/gl.h>
-// GLM
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-// FreeType
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
 #include "error.hpp"
 #include "shader.hpp"
 

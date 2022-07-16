@@ -1,13 +1,12 @@
 #pragma once
 #define GLM_FORCE_SWIZZLE
-#include <glm/glm.hpp>
-#include <GL/gl.h>
 #include <array>
 #include <cmath>
 #include <unordered_map>
 #include <unordered_set>
 
-#include <iostream>
+#include <GL/gl.h>
+#include <glm/glm.hpp>
 
 typedef std::unordered_set<int> hashset;
 typedef std::unordered_map<int, hashset> hashmap;

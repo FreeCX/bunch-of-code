@@ -191,6 +191,5 @@ void Points::explode(glm::vec2 pos, GLfloat size, GLfloat k) {
         if (r < size) {
             push(i, k * n / r);
         }
-
     }
 }

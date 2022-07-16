@@ -1,6 +1,6 @@
 #pragma once
+#include <cstdarg>
 #include <iostream>
-#include <stdarg.h>
 
 void send_info(int count, ...);
 void send_warning(const char *module, const char *info);
