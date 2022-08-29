@@ -7,6 +7,7 @@
 - [Thunder distance calculator](distance.rs)
 - Fibbonachi sequence [example #1](fib_measure.rs) and [example #2](fib_sequence.rs)
 - [Simple password generator](pgen.rs)
+- [Struct serialize-deserisalize demo](serialize.rs)
 - [Simple tokenizer](tokenizer.rs)
 - [Xor shift demo](xor-shift.rs)
 - [Xoshiro256 implementation](xoshiro256ss.rs)
