@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from random import random, randint
+from random import randint, random
 
 """
 four fours problem
@@ -18,6 +18,7 @@ search_list = list(map(lambda x: x * 1.0, range(100)))
 
 # get last element from list
 last = lambda lst: lst[len(lst) - 1]
+
 
 # iterate list by two elements
 def iterByTwo(lst):

@@ -1,7 +1,7 @@
 #!/bin/env python3
 import functions as fs
-import pyaudio as pa
 import numpy as np
+import pyaudio as pa
 import pygame
 
 SAMPLE_RATE = 44100
@@ -73,19 +73,19 @@ if __name__ == "__main__":
                     freq_array *= 2
                     print("freq_array =", freq_array)
                     tones = generate_tones(duration_tone)
-                for (function, key) in gen_func_list:
+                for function, key in gen_func_list:
                     if key == event.key:
                         print("gen_function =", function.__name__)
                         gen_func = function
                         tones = generate_tones(duration_tone)
-                for (index, key) in enumerate(key_list):
+                for index, key in enumerate(key_list):
                     if event.key == key:
                         key_dict[key] = True
             if event.type == pygame.KEYUP:
-                for (index, key) in enumerate(key_list):
+                for index, key in enumerate(key_list):
                     if event.key == key:
                         key_dict[key] = False
-        for (index, key) in enumerate(key_list):
+        for index, key in enumerate(key_list):
             if key_dict[key] is True:
                 stream.write(tones[index])
     pygame.quit()

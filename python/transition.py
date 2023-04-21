@@ -1,7 +1,8 @@
-from PIL import Image, UnidentifiedImageError
-import subprocess as sp
-import numpy as np
 import argparse
+import subprocess as sp
+
+import numpy as np
+from PIL import Image, UnidentifiedImageError
 
 
 class ffmpeg:

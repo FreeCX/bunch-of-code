@@ -1,7 +1,7 @@
 # http://fractalworld.xaoc.ru/L-system_collection
 import argparse
-import turtle
 import json
+import turtle
 
 
 class LSystem:
@@ -26,6 +26,7 @@ class LSystem:
             self.step()
         return self
 
+    @property
     def result(self):
         return self.__result
 
@@ -44,38 +45,46 @@ class Turtle:
     def run(self, savename=None):
         turtle.speed(0)
         turtle.hideturtle()
+
         for _ in range(self.__loops):
             for symbol in self.__cmds:
-                if self.__rules.get(symbol):
-                    if ":" in self.__rules[symbol]:
-                        cmd, var = self.__rules.get(symbol).split(":")
-                        cmd, var = cmd.lower(), float(var) if var.isdigit() else None
-                    else:
-                        cmd = self.__rules.get(symbol)
-                        var = None
-                else:
+                if not self.__rules.get(symbol):
                     continue
-                if cmd == "forward":
-                    turtle.forward(var)
-                elif cmd == "left":
-                    turtle.left(var)
-                elif cmd == "right":
-                    turtle.right(var)
-                elif cmd == "push_angle":
-                    self.__angles.append(turtle.heading())
-                elif cmd == "pop_angle":
-                    turtle.setheading(self.__angles.pop())
-                elif cmd == "push_all":
-                    self.__stack.append((turtle.xcor(), turtle.ycor(), turtle.heading()))
-                elif cmd == "pop_all":
-                    x, y, a = self.__stack.pop()
-                    turtle.setpos(x, y)
-                    turtle.setheading(a)
+
+                cmd = self.__rules.get(symbol)
+                var = None
+                if ":" in self.__rules[symbol]:
+                    cmd, var = cmd.split(":")
+                    cmd = cmd.lower()
+                    if var.isdigit():
+                        var = float(var)
+
+                match cmd:
+                    case "forward":
+                        turtle.forward(var)
+                    case "left":
+                        turtle.left(var)
+                    case "right":
+                        turtle.right(var)
+                    case "push_angle":
+                        self.__angles.append(turtle.heading())
+                    case "pop_angle":
+                        turtle.setheading(self.__angles.pop())
+                    case "push_all":
+                        self.__stack.append((turtle.xcor(), turtle.ycor(), turtle.heading()))
+                    case "pop_all":
+                        x, y, a = self.__stack.pop()
+                        turtle.setpos(x, y)
+                        turtle.setheading(a)
+                    case other:
+                        print(f"unknown command: {other}")
+
         if savename:
             ts = turtle.getscreen()
             ts.getcanvas().postscript(file="{}.eps".format(savename))
-        else:
-            turtle.mainloop()
+            return
+
+        turtle.mainloop()
 
 
 def execute_model(filename, *, savename=None, iterations=None):
@@ -83,17 +92,23 @@ def execute_model(filename, *, savename=None, iterations=None):
         data = json.load(jsf)
     if iterations:
         data["iterations"] = iterations
-    result = LSystem(start=data["axiom"], rules=data["generate_rules"]).iterate(data["iterations"]).result()
+    result = LSystem(start=data["axiom"], rules=data["generate_rules"]).iterate(data["iterations"]).result
     Turtle(cmds=result, start_angle=data["start_angle"], rules=data["draw_rules"]).run(savename=savename)
 
 
-if __name__ == "__main__":
+def main():
     parser = argparse.ArgumentParser(description="Draw L System model")
     parser.add_argument("-m", metavar="model", type=str, default=None, help="input model file")
     parser.add_argument("-i", metavar="iterations", type=int, default=None, help="number of iterations")
     parser.add_argument("-o", metavar="output", type=str, default=None, help="name for output eps file")
     args = parser.parse_args()
-    if args.m:
-        execute_model(args.m, savename=args.o, iterations=args.i)
-    else:
+
+    if not args.m:
         parser.print_help()
+        return
+
+    execute_model(args.m, savename=args.o, iterations=args.i)
+
+
+if __name__ == "__main__":
+    main()

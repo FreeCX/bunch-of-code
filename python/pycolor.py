@@ -1,7 +1,8 @@
-from PIL import Image, ImageDraw
 from colorsys import hsv_to_rgb
 from itertools import cycle
+
 import numpy as np
+from PIL import Image, ImageDraw
 
 
 def generate_colors(saturation=0.8, brightness=0.9, count=3):

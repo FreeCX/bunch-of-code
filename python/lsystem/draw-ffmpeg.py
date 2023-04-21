@@ -1,47 +1,23 @@
 # https://habr.com/ru/company/piter/blog/496538/
-from copy import deepcopy
-from pathlib import Path
-import subprocess as sp
 import argparse
 import json
 import math
+import subprocess as sp
+from copy import deepcopy
+from pathlib import Path
 
 from PIL import Image, ImageDraw
 
 
 class ffmpeg:
     def __init__(self, fps, output):
+        # fmt: off
         self.cmd_out = [
-            "ffmpeg",
-            "-i",
-            "-",
-            "-f",
-            "image2pipe",
-            "-r",
-            str(fps),
-            "-c:v",
-            "libx264",
-            "-preset",
-            "slow",
-            "-profile:v",
-            "high",
-            "-crf",
-            "18",
-            "-coder",
-            "1",
-            "-pix_fmt",
-            "yuv420p",
-            "-vf",
-            "scale=iw:-2",
-            "-movflags",
-            "+faststart",
-            "-g",
-            "30",
-            "-bf",
-            "2",
-            "-y",
-            str(output),
+            "ffmpeg", "-i", "-", "-f", "image2pipe", "-r", str(fps), "-c:v", "libx264", "-preset", "slow",
+            "-profile:v", "high", "-crf", "18", "-coder", "1", "-pix_fmt", "yuv420p", "-vf", "scale=iw:-2",
+            "-movflags", "+faststart", "-g", "30", "-bf", "2", "-y", str(output),
         ]
+        # fmt: on
         self.pipe = sp.Popen(self.cmd_out, stdin=sp.PIPE)
 
     def push(self, frame):
@@ -67,28 +43,29 @@ def generate(init, iterations, rules):
 def execute(x, y, angle, symbol, rules, stack):
     draw = False
 
-    if rules.get(symbol):
-        if ":" in rules[symbol]:
-            cmd, var = rules[symbol].split(":")
-            cmd, var = cmd.lower(), float(var) if var.isdigit() else None
-        else:
-            cmd = rules.get(symbol)
-            var = None
+    if cmd := rules.get(symbol):
+        var = None
+        if ":" in cmd:
+            cmd, var = cmd.split(":")
+            cmd = cmd.lower()
+            if var.isdigit():
+                var = float(var)
 
-        draw = False
-
-        if cmd == "forward":
-            x += round(var * math.cos(math.radians(angle)))
-            y += round(var * math.sin(math.radians(angle)))
-            draw = True
-        elif cmd == "left":
-            angle = (angle + var) % 360
-        elif cmd == "right":
-            angle = (angle - var) % 360
-        elif cmd == "push":
-            stack.append((x, y, angle))
-        elif cmd == "pop":
-            x, y, angle = stack.pop()
+        match cmd:
+            case "forward":
+                x += round(var * math.cos(math.radians(angle)))
+                y += round(var * math.sin(math.radians(angle)))
+                draw = True
+            case "left":
+                angle = (angle + var) % 360
+            case "right":
+                angle = (angle - var) % 360
+            case "push":
+                stack.append((x, y, angle))
+            case "pop":
+                x, y, angle = stack.pop()
+            case other:
+                print(f"unknown command: {other}")
 
     return x, y, angle, draw
 
@@ -154,23 +131,36 @@ def execute_model(filename, *, savename=None, steps=4, fps=25):
         render(savename, state, result, data["start_angle"], data["draw_rules"], steps, fps)
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Draw L System model")
-    parser.add_argument("-m", dest="model", metavar="model", type=str, default=None, help="input model file")
-    parser.add_argument(
-        "-s", dest="steps", metavar="steps", type=int, default=4, help="line steps drawing (default: 4)"
+def main():
+    parser = argparse.ArgumentParser(
+        description="Draw L System model", formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
-    parser.add_argument("-f", dest="fps", metavar="fps", type=int, default=25, help="fps (default: 25)")
+    parser.add_argument("-m", dest="model", metavar="model", type=str, default=None, help="input model file")
+    parser.add_argument("-s", dest="steps", metavar="steps", type=int, default=4, help="line steps drawing")
+    parser.add_argument("-f", dest="fps", metavar="fps", type=int, default=25, help="fps")
     args = parser.parse_args()
-    if args.model:
-        renamer = lambda model: str(model).rsplit(".", 1)[0] + ".mp4"
-        model = Path(args.model)
-        if model.is_dir():
-            for file in model.iterdir():
-                print(f"> processing {file}")
-                execute_model(file, savename=renamer(file), steps=args.steps, fps=args.fps)
-        else:
-            print(f"> processing {model}")
-            execute_model(model, savename=renamer(model), steps=args.steps, fps=args.fps)
-    else:
+
+    if not args.model:
         parser.print_help()
+        return
+
+    renamer = lambda model: str(model).rsplit(".", 1)[0] + ".mp4"
+    model = Path(args.model)
+
+    # process one file
+    if model.is_file():
+        print(f"> processing {model}")
+        execute_model(model, savename=renamer(model), steps=args.steps, fps=args.fps)
+        return
+
+    # process folder
+    for file in model.iterdir():
+        if file.suffix != ".json":
+            print(f"> ignore {file}")
+            continue
+        print(f"> processing {file}")
+        execute_model(file, savename=renamer(file), steps=args.steps, fps=args.fps)
+
+
+if __name__ == "__main__":
+    main()

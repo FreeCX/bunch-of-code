@@ -1,10 +1,10 @@
-from pathlib import Path
-from random import randint
 import argparse
 import sys
+from pathlib import Path
+from random import randint
 
-from PIL import Image, ImageDraw
 import numpy as np
+from PIL import Image, ImageDraw
 
 # extra params
 USE_GRAY_CODE = False

@@ -1,6 +1,7 @@
-from pathlib import Path
-from PIL import Image
 import argparse
+from pathlib import Path
+
+from PIL import Image
 
 
 def crop_image(file):

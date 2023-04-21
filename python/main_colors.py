@@ -1,8 +1,9 @@
-from sklearn.cluster import KMeans
-from PIL import Image, ImageDraw
-from os.path import splitext
 import colorsys as cs
 import math
+from os.path import splitext
+
+from PIL import Image, ImageDraw
+from sklearn.cluster import KMeans
 
 
 def get_main_colors(filename, n_colors=5, debug_image=False, use_hsv=True):

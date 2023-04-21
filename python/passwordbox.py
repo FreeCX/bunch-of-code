@@ -1,9 +1,9 @@
 #!/bin/env python
-from pathlib import Path
 import argparse
-import secrets
 import random
+import secrets
 import string
+from pathlib import Path
 
 
 def generate(args):
@@ -94,6 +94,7 @@ def analyze(args):
     args.save   -- выходное файл для сохранения графика
     """
     from collections import Counter
+
     import matplotlib.pyplot as plt
 
     data = args.box.open().read()

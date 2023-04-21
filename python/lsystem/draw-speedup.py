@@ -1,10 +1,11 @@
 # https://habr.com/ru/company/piter/blog/496538/
-from PIL import Image, ImageDraw
-from copy import deepcopy
-from pathlib import Path
 import argparse
 import json
 import math
+from copy import deepcopy
+from pathlib import Path
+
+from PIL import Image, ImageDraw
 
 
 def generate(init, iterations, rules):
@@ -17,28 +18,31 @@ def generate(init, iterations, rules):
 
 
 def execute(x, y, angle, symbol, rules, stack):
-    if rules.get(symbol):
-        if ":" in rules[symbol]:
-            cmd, var = rules[symbol].split(":")
-            cmd, var = cmd.lower(), float(var) if var.isdigit() else None
-        else:
-            cmd = rules.get(symbol)
-            var = None
+    draw = False
 
-        draw = False
+    if cmd := rules.get(symbol):
+        var = None
+        if ":" in cmd:
+            cmd, var = cmd.split(":")
+            cmd = cmd.lower()
+            if var.isdigit():
+                var = float(var)
 
-        if cmd == "forward":
-            x += round(var * math.cos(math.radians(angle)))
-            y += round(var * math.sin(math.radians(angle)))
-            draw = True
-        elif cmd == "left":
-            angle = (angle + var) % 360
-        elif cmd == "right":
-            angle = (angle - var) % 360
-        elif cmd == "push":
-            stack.append((x, y, angle))
-        elif cmd == "pop":
-            x, y, angle = stack.pop()
+        match cmd:
+            case "forward":
+                x += round(var * math.cos(math.radians(angle)))
+                y += round(var * math.sin(math.radians(angle)))
+                draw = True
+            case "left":
+                angle = (angle + var) % 360
+            case "right":
+                angle = (angle - var) % 360
+            case "push":
+                stack.append((x, y, angle))
+            case "pop":
+                x, y, angle = stack.pop()
+            case other:
+                print(f"unknown command: {other}")
 
     return x, y, angle, draw
 
@@ -101,15 +105,17 @@ def execute_model(filename, *, savename=None, animate=False):
         data = json.load(jsf)
         result = generate(data["axiom"], data["iterations"], data["generate_rules"])
         state = prerender(result, data["start_angle"], data["draw_rules"])
+
         if animate:
             images = animation(state, result, data["start_angle"], data["draw_rules"])
             images[0].save(savename, save_all=True, append_images=images[1:], duration=10, loop=0)
-        else:
-            result = render(state, result, data["start_angle"], data["draw_rules"])
-            result.save(savename)
+            return
+
+        result = render(state, result, data["start_angle"], data["draw_rules"])
+        result.save(savename)
 
 
-if __name__ == "__main__":
+def main():
     model_to_png = lambda model: str(model).rsplit(".", 1)[0] + ".png"
     model_to_gif = lambda model: str(model).rsplit(".", 1)[0] + ".gif"
 
@@ -117,15 +123,28 @@ if __name__ == "__main__":
     parser.add_argument("-m", metavar="model", type=str, default=None, help="input model file")
     parser.add_argument("-a", action="store_true", default=False, help="create animation")
     args = parser.parse_args()
-    if args.m:
-        renamer = model_to_gif if args.a else model_to_png
-        model = Path(args.m)
-        if model.is_dir():
-            for file in model.iterdir():
-                print(f"> processing {file}")
-                execute_model(file, savename=renamer(file), animate=args.a)
-        else:
-            print(f"> processing {model}")
-            execute_model(model, savename=renamer(model), animate=args.a)
-    else:
+
+    if not args.m:
         parser.print_help()
+        return
+
+    renamer = model_to_gif if args.a else model_to_png
+    model = Path(args.m)
+
+    # process one file
+    if model.is_file():
+        print(f"> processing {model}")
+        execute_model(model, savename=renamer(model), animate=args.a)
+        return
+
+    # process folder
+    for file in model.iterdir():
+        if file.suffix != ".json":
+            print(f"> ignore {file}")
+            continue
+        print(f"> processing {file}")
+        execute_model(file, savename=renamer(file), animate=args.a)
+
+
+if __name__ == "__main__":
+    main()

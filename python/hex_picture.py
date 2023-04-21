@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
-from PIL import Image, ImageFont, ImageDraw
 import random as random_number
+
+from PIL import Image, ImageDraw, ImageFont
 
 width = 1920
 height = 1080

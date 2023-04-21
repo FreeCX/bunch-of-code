@@ -1,6 +1,7 @@
-from PIL import Image, ImageDraw
 from colorsys import hsv_to_rgb
 from itertools import cycle
+
+from PIL import Image, ImageDraw
 
 
 class Grid:

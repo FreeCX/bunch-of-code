@@ -1,5 +1,5 @@
-from time import sleep
 from math import ceil
+from time import sleep
 
 
 def progress_bar(index, max_value=100):

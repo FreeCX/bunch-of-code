@@ -1,7 +1,7 @@
-from PIL import Image, UnidentifiedImageError
-from pathlib import Path
 import argparse
+from pathlib import Path
 
+from PIL import Image, UnidentifiedImageError
 
 oversize_k = 1.5
 

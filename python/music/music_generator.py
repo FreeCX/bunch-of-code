@@ -1,8 +1,9 @@
-from audio_experiment import generate_sample, SAMPLE_RATE
 from collections import defaultdict
 from time import sleep
-import pyaudio as pa
+
 import numpy as np
+import pyaudio as pa
+from audio_experiment import SAMPLE_RATE, generate_sample
 
 P1 = 16
 
@@ -159,7 +160,7 @@ class Music:
             "H8": 7902.1,
         }
         result = defaultdict(np.array)
-        for (note, freq) in notes.items():
+        for note, freq in notes.items():
             result[note] = np.array(generate_sample(freq, duration, 1.0), dtype=np.int16)
         return result
 

@@ -1,7 +1,8 @@
 # https://habr.com/ru/post/438448/
-import struct as st
-import numpy as np
 import argparse
+import struct as st
+
+import numpy as np
 
 one_2pi = 1.0 / (2.0 * 3.141592653589793)
 

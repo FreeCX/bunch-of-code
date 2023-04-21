@@ -1,9 +1,9 @@
-from multiprocessing.dummy import Pool as ThreadPool
-from shapely.geometry import Point, Polygon
-from time import time
-import numpy as np
 import json as js
+from multiprocessing.dummy import Pool as ThreadPool
+from time import time
 
+import numpy as np
+from shapely.geometry import Point, Polygon
 
 THREAD_COUNT = 8
 

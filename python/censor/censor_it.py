@@ -1,9 +1,9 @@
+import argparse
 from itertools import cycle
 from pathlib import Path
-import argparse
 
-from PIL import Image
 import numpy as np
+from PIL import Image
 
 
 def seed_from_key(key, max_seed=4096):
@@ -54,7 +54,6 @@ def censor_it(input, mask, key, output=None):
 
 
 if __name__ == "__main__":
-
     parser = argparse.ArgumentParser(description="reversable image censor")
     parser.add_argument("-i", dest="input", metavar="image", type=Path, required=True, help="input image")
     parser.add_argument("-m", dest="mask", metavar="mask", type=Path, required=True, help="mask image")

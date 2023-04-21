@@ -1,7 +1,7 @@
 #!/bin/env python3
 # from sys import stdout
-import pyaudio as pa
 import numpy as np
+import pyaudio as pa
 
 SAMPLE_RATE = 44100
 FREQ = 330.0

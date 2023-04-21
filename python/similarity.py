@@ -1,11 +1,11 @@
-from itertools import combinations
-from pathlib import Path
 import argparse
 import json
+from itertools import combinations
+from pathlib import Path
 
 import imagehash as ih
-from PIL import Image
 import numpy as np
+from PIL import Image
 
 
 def process(args):

@@ -1,8 +1,8 @@
-from tempfile import TemporaryDirectory
+import argparse
+from os import system
 from pathlib import Path
 from sys import stdout
-from os import system
-import argparse
+from tempfile import TemporaryDirectory
 
 from PIL import Image
 

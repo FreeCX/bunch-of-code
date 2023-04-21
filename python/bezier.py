@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from functools import reduce
 import operator
-import pygame
+from functools import reduce
 
+import pygame
 
 test_points = [[50, 50], [500, 1500], [500, -800], [750, 750]]
 background_color = (100, 100, 100)
