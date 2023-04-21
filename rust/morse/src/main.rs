@@ -51,33 +51,15 @@ fn encode(input: &str) -> String    {
     result
 }
 
-// enum порядка байтов
-enum Order {
-    BigEndian,
-    LittleEndian
-}
-
-// фукнция определения порядка следования байт
-fn hi_lo(data: u16, order: Order) -> [u8; 2] {
-    // старшый байт
-    let hi = ((data >> 8) & 0xff) as u8;
-    // младший байт
-    let lo = (data & 0xff) as u8;
-    match order {
-        Order::BigEndian => [hi, lo],
-        Order::LittleEndian => [lo, hi],
-    }
-}
-
 fn generate(freq: f32, duration: f32, volume: f32) -> Vec<u8> {
     // частота дискретизации
-    let sample_rate = 44100;
-    // амплитуда определяется максимальным значением для i16 умноженая на громкость
-    let amplitude = std::i16::MAX as f32 * volume;
+    let sample_rate = 44100.0;
+    // amplitude = 2^16 * volume
+    let amplitude = 2.0 * std::i16::MAX as f32 * volume;
     // количество генерируемых сэмплов
-    let total_samples: u32 = (sample_rate as f32 * duration).round() as u32;
+    let total_samples: u32 = (sample_rate * duration).round() as u32;
     // угловая частота / частоте дискретизации
-    let w = 2.0 * std::f32::consts::PI * freq / sample_rate as f32;
+    let w = std::f32::consts::TAU * freq / total_samples as f32;
     // мы будем делать u16, а записывать по 2 блока u8 в формате BigEndian
     let mut buffer: Vec<u8> = Vec::with_capacity(2 * total_samples as usize);
     for k in 0..total_samples {
@@ -85,10 +67,8 @@ fn generate(freq: f32, duration: f32, volume: f32) -> Vec<u8> {
         // A -- амплитуда сигнала
         // k -- номер сэмпла
         let sample = (amplitude * (k as f32 * w).sin()) as u16;
-        // разбиваем u16 на два u8 в LittleEndian
-        let bytes = hi_lo(sample, Order::LittleEndian);
         // проталкиваем в буффер
-        buffer.extend_from_slice(&bytes);
+        buffer.extend_from_slice(&sample.to_le_bytes());
     }
     buffer
 }
