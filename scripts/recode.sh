@@ -31,7 +31,8 @@ for input in "$@"; do
     output="${input%.*}_recoded.mp4"
 
     # get video width and height
-    IFS=x read width height <<< `${FFPROBE} "$input" -v error -show_entries stream=width,height -of csv=p=0:s=x`
+    width=`${FFPROBE} "$input" -v error -show_entries stream=width -of csv=p=0`
+    height=`${FFPROBE} "$input" -v error -show_entries stream=height -of csv=p=0`
 
     if [ $(( $width % 2 )) -ne 0 ]; then
         width=$(( $width - 1 ))
