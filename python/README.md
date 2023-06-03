@@ -1,6 +1,7 @@
 # Content
 - [(De)censor image](./censor/)
 - [Surname generator](./family/)
+- [Github backup script](./gh-backup/)
 - [L-System generator](./lsystem/)
 - [Simple music scripts](./music/)
 - [Abstract wallpaper generator](abstract-wallpaper.py)
@@ -18,7 +19,7 @@
 - [Password box](passwordbox.py)
 - [Progress bar demo](progress_bar.py)
 - [Palette generator](pycolor.py)
-- [Geodate processing script](shape.py) ([see this](../rust/shapey/))
+- [Geodata processing script](shape.py) ([see this](../rust/shapey/))
 - [Find similar images](similarity.py)
 - [Generate timelapse command for ffmpeg](timelapse.py)
 - [Make transition from one image to another with ffmpeg](transition.py)
