@@ -1,0 +1,5 @@
+[package]
+name = "cellmachine-ffmpeg"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alexey Golubev <dr.freecx@gmail.com>"]

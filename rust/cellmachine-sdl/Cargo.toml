@@ -1,0 +1,8 @@
+[package]
+name = "cellmachine-sdl"
+version = "0.1.0"
+edition = "2021"
+authors = ["Alexey Golubev <dr.freecx@gmail.com>"]
+
+[dependencies.sdl2]
+version = "0.35"
