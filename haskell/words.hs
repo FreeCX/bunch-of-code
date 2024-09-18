@@ -31,7 +31,7 @@ count = join . L.group . L.sort . filterByLen
 
 -- функция вывода статистики
 -- 1. сортируем по убыванию
--- 2. вывоодим по одному элементу
+-- 2. выводим по одному элементу
 stat :: [(Int, String)] -> IO ()
 stat = mapM_ printItem . L.sortOn reverseOrderFst
   where reverseOrderFst = \(a, _) -> -a
