@@ -2,6 +2,7 @@
 
 FFPROBE=ffprobe
 FFMPEG=ffmpeg
+TR=tr
 
 function check_app {
     if ! type -P $1 &> /dev/null; then
@@ -19,6 +20,7 @@ fi
 # check for apps
 check_app $FFPROBE
 check_app $FFMPEG
+check_app $TR
 
 # process all input files
 for input in "$@"; do
@@ -31,14 +33,22 @@ for input in "$@"; do
     output="${input%.*}_recoded.mp4"
 
     # get video width and height
-    width=`${FFPROBE} "$input" -v error -show_entries stream=width -of csv=p=0`
-    height=`${FFPROBE} "$input" -v error -show_entries stream=height -of csv=p=0`
+    width=`${FFPROBE} "$input" -v error -show_entries stream=width -of csv=p=0 | ${TR} -d '\n\t\r '`
+    height=`${FFPROBE} "$input" -v error -show_entries stream=height -of csv=p=0 | ${TR} -d '\n\t\r '`
 
+    size_changed=false
+    old_width="$width"
+    old_height="$height"
     if [ $(( $width % 2 )) -ne 0 ]; then
         width=$(( $width - 1 ))
+        size_changed=true
     fi
     if [ $(( $height % 2 )) -ne 0 ]; then
         height=$(( $height - 1 ))
+        size_changed=true
+    fi
+    if [ "$size_changed" = true ]; then
+        echo "Video size changed $old_width x $old_height -> $width x $height"
     fi
 
     # recode
